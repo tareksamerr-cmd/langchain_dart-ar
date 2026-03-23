@@ -1,21 +1,21 @@
-# Quickstart
+# دليل البدء السريع (Quickstart)
 
-In this quickstart we'll show you how to:
+في هذا الدليل السريع، سنوضح لك كيفية:
 
-- Get setup with LangChain.dart
-- Use the most basic and common components of LangChain: prompt templates, models, and output parsers
-- Use LangChain Expression Language, the protocol that LangChain is built on and which facilitates component chaining
-- Build a simple application with LangChain
+- البدء باستخدام LangChain.dart.
+- استخدام المكونات الأساسية والأكثر شيوعًا في LangChain: قوالب الأوامر (prompt templates)، النماذج (models)، ومحللات المخرجات (output parsers).
+- استخدام لغة تعبير LangChain (LangChain Expression Language)، وهو البروتوكول الذي بنيت عليه LangChain ويسهل ربط المكونات ببعضها.
+- بناء تطبيق بسيط باستخدام LangChain.
 
-That's a fair amount to cover! Let's dive in.
+هذا قدر لا بأس به لتغطيته! دعنا نتعمق.
 
-## Setup
+## الإعداد (Setup)
 
-To get started, follow the [installation instructions](/get_started/installation.md) to install LangChain.dart.
+للبدء، اتبع [تعليمات التثبيت](/get_started/installation.md) لتثبيت LangChain.dart.
 
-Using LangChain.dart will usually require integrations with one or more model providers, data stores, APIs, etc. For this example, we'll use OpenAI's model APIs.
+سيتطلب استخدام LangChain.dart عادةً دمجًا مع مزود واحد أو أكثر من مزودي النماذج (model providers)، ومخازن البيانات (data stores)، وواجهات برمجة التطبيقات (APIs)، وما إلى ذلك. لهذا المثال، سنستخدم واجهات برمجة تطبيقات نماذج OpenAI.
 
-First we'll need to add LangChain.dart OpenAI package:
+أولاً، سنحتاج إلى إضافة حزمة LangChain.dart OpenAI:
 
 ```yaml
 dependencies:
@@ -23,9 +23,9 @@ dependencies:
   langchain_openai: { version }
 ```
 
-Accessing the OpenAI API requires an API key, which you can get by creating an account and heading [here](https://platform.openai.com/account/api-keys).
+يتطلب الوصول إلى OpenAI API مفتاح API (API key)، والذي يمكنك الحصول عليه عن طريق إنشاء حساب والتوجه [هنا](https://platform.openai.com/account/api-keys).
 
-The library does not force you to use any specific key management strategy. You just need to pass the key on the `ChatOpenAI` constructor:
+لا تفرض المكتبة عليك استخدام أي استراتيجية محددة لإدارة المفاتيح. ما عليك سوى تمرير المفتاح إلى مُنشئ `ChatOpenAI`:
 
 ```dart
 import 'package:langchain/langchain.dart';
@@ -34,56 +34,56 @@ import 'package:langchain_openai/langchain_openai.dart';
 final llm = ChatOpenAI(apiKey: openaiApiKey);
 ```
 
-## Building with LangChain.dart
+## البناء باستخدام LangChain.dart (Building with LangChain.dart)
 
-LangChain provides many modules that can be used to build language model applications. Modules can be used as standalone in simple applications, and they can be composed for more complex use cases. Composition is powered by LangChain Expression Language (LCEL), which defines a unified `Runnable` interface that many modules implement, making it possible to seamlessly chain components.
+توفر LangChain العديد من الوحدات (modules) التي يمكن استخدامها لبناء تطبيقات نماذج اللغة (language model applications). يمكن استخدام الوحدات بشكل مستقل في التطبيقات البسيطة، ويمكن تجميعها لحالات استخدام أكثر تعقيدًا. يتم تشغيل التجميع بواسطة LangChain Expression Language (LCEL)، والذي يحدد واجهة `Runnable` موحدة تنفذها العديد من الوحدات، مما يجعل من الممكن ربط المكونات بسلاسة.
 
-The simplest and most common chain contains three things:
+السلسلة (chain) الأبسط والأكثر شيوعًا تحتوي على ثلاثة أشياء:
 
-- LLM/Chat Model: The language model is the core reasoning engine here. In order to work with LangChain, you need to understand the different types of language models and how to work with them.
-- Prompt Template: This provides instructions to the language model. This controls what the language model outputs, so understanding how to construct prompts and different prompting strategies is crucial.
-- Output Parser: These translate the raw response from the language model to a more workable format, making it easy to use the output downstream.
+- LLM/Chat Model: نموذج اللغة (language model) هو محرك التفكير الأساسي هنا. للعمل مع LangChain، تحتاج إلى فهم الأنواع المختلفة لنماذج اللغة وكيفية العمل معها.
+- Prompt Template: يوفر هذا تعليمات لنموذج اللغة. يتحكم هذا في ما يخرجه نموذج اللغة، لذا فإن فهم كيفية بناء الـ prompts واستراتيجيات الـ prompting المختلفة أمر بالغ الأهمية.
+- Output Parser: تقوم هذه بتحويل الاستجابة الخام من نموذج اللغة إلى تنسيق أكثر قابلية للاستخدام، مما يسهل استخدام المخرجات في المراحل اللاحقة.
 
-In this guide we'll cover those three components individually, and then go over how to combine them. Understanding these concepts will set you up well for being able to use and customize LangChain applications. Most LangChain applications allow you to configure the model and/or the prompt, so knowing how to take advantage of this will be a big enabler.
+في هذا الدليل، سنغطي هذه المكونات الثلاثة بشكل فردي، ثم ننتقل إلى كيفية دمجها. سيساعدك فهم هذه المفاهيم على استخدام وتخصيص تطبيقات LangChain بشكل جيد. تسمح لك معظم تطبيقات LangChain بتكوين النموذج و/أو الـ prompt، لذا فإن معرفة كيفية الاستفادة من ذلك سيكون عامل تمكين كبير.
 
-## LLM / Chat Model
+## نموذج LLM / Chat Model
 
-There are two types of language models:
+هناك نوعان من نماذج اللغة:
 
-- `LLM`: underlying model takes a string as input and returns a string.
-- `ChatModel`: underlying model takes a list of messages as input and returns a message.
+- `LLM`: النموذج الأساسي يأخذ سلسلة نصية (string) كمدخل ويعيد سلسلة نصية.
+- `ChatModel`: النموذج الأساسي يأخذ قائمة من الرسائل (list of messages) كمدخل ويعيد رسالة (message).
 
-Strings are simple, but what exactly are messages? The base message interface is defined by `ChatMessage`, which has two required attributes:
+السلاسل النصية بسيطة، ولكن ما هي الرسائل بالضبط؟ يتم تعريف واجهة الرسالة الأساسية بواسطة `ChatMessage`، والتي تحتوي على خاصيتين مطلوبتين:
 
-- `content`: The content of the message. Usually a string.
-- `role`: The entity from which the `ChatMessage` is coming.
+- `content`: محتوى الرسالة. عادة ما يكون سلسلة نصية.
+- `role`: الكيان الذي تأتي منه `ChatMessage`.
 
-LangChain provides several objects to easily distinguish between different roles:
+توفر LangChain عدة كائنات للتمييز بسهولة بين الأدوار المختلفة:
 
-- `HumanChatMessage`: A `ChatMessage` coming from a human/user.
-- `AIChatMessage`: A `ChatMessage` coming from an AI/assistant.
-- `SystemChatMessage`: A `ChatMessage` coming from the system.
-- `FunctionChatMessage` / `ToolChatMessage`: A `ChatMessage` containing the output of a function or tool call.
+- `HumanChatMessage`: `ChatMessage` قادمة من إنسان/مستخدم.
+- `AIChatMessage`: `ChatMessage` قادمة من ذكاء اصطناعي/مساعد.
+- `SystemChatMessage`: `ChatMessage` قادمة من النظام.
+- `FunctionChatMessage` / `ToolChatMessage`: `ChatMessage` تحتوي على مخرجات استدعاء دالة (function call) أو أداة (tool call).
 
-If none of those roles sound right, there is also a `CustomChatMessage` class where you can specify the role manually. 
+إذا لم يكن أي من هذه الأدوار مناسبًا، فهناك أيضًا فئة `CustomChatMessage` حيث يمكنك تحديد الدور يدويًا.
 
-LangChain provides a common interface that's shared by both `LLMs` and `ChatModels`. However, it's useful to understand the difference in order to most effectively construct prompts for a given language model.
+توفر LangChain واجهة مشتركة تشاركها كل من `LLMs` و `ChatModels`. ومع ذلك، من المفيد فهم الفرق من أجل بناء الـ prompts الأكثر فعالية لنموذج لغة معين.
 
-The simplest way to call an `LLM` or `ChatModel` is using `.invoke()`, the universal call method for all LangChain Expression Language (LCEL) objects:
+أبسط طريقة لاستدعاء `LLM` أو `ChatModel` هي استخدام `.invoke()`، وهي طريقة الاستدعاء العالمية لجميع كائنات LangChain Expression Language (LCEL):
 
-- `LLM.invoke`: Takes in a string, returns a string.
-- `ChatModel.invoke`: Takes in a list of `ChatMessage`, returns a `ChatMessage`.
+- `LLM.invoke`: يأخذ سلسلة نصية، ويعيد سلسلة نصية.
+- `ChatModel.invoke`: يأخذ قائمة من `ChatMessage`، ويعيد `ChatMessage`.
 
-The input types for these methods are actually more general than this, but for simplicity here we can assume `LLMs` only take strings and `ChatModels` only takes lists of messages. Check out the "Go deeper" section below to learn more about model invocation.
+أنواع المدخلات لهذه الطرق هي في الواقع أكثر عمومية من هذا، ولكن للتبسيط هنا يمكننا افتراض أن `LLMs` تأخذ سلاسل نصية فقط وأن `ChatModels` تأخذ قوائم من الرسائل فقط. تحقق من قسم "Go deeper" أدناه لمعرفة المزيد حول استدعاء النموذج.
 
-Let's see how to work with these different types of models and these different types of inputs. First, let's import an `LLM` and a `ChatModel`.
+دعنا نرى كيفية العمل مع هذه الأنواع المختلفة من النماذج وهذه الأنواع المختلفة من المدخلات. أولاً، دعنا نستورد `LLM` و `ChatModel`.
 
 ```dart
 final llm = OpenAI(apiKey: openaiApiKey);
 final chatModel = ChatOpenAI(apiKey: openaiApiKey);
 ```
 
-`LLM` and `ChatModel` objects are effectively configuration objects. You can initialize them with parameters like `temperature` and others, and pass them around.
+تعتبر كائنات `LLM` و `ChatModel` كائنات تكوين (configuration objects) فعالة. يمكنك تهيئتها بمعاملات مثل `temperature` وغيرها، وتمريرها.
 
 ```dart
 const text = 'What would be a good company name for a company that makes colorful socks?';
@@ -98,15 +98,15 @@ print(res2.output);
 // AIChatMessage(content='RainbowSock Co.')
 ```
 
-?> `LLM.invoke` and `ChatModel.invoke` take as input a `PromptValue`. This is an object that defines its own custom logic for returning its inputs either as a string or as messages. `LLM`s have logic for coercing any of these into a string, and `ChatModel`s have logic for coercing any of these to messages. The fact that `LLM` and `ChatModel` accept the same inputs means that you can directly swap them for one another in most chains without breaking anything, though it's of course important to think about how inputs are being coerced and how that may affect model performance. To dive deeper on models head to the [Language models](/modules/model_io/models/models.md) section.
+?> `LLM.invoke` و `ChatModel.invoke` يأخذان كمدخل `PromptValue`. هذا كائن يحدد منطقه المخصص لإرجاع مدخلاته إما كسلسلة نصية أو كرسائل. تحتوي `LLMs` على منطق لتحويل أي من هذه إلى سلسلة نصية، وتحتوي `ChatModels` على منطق لتحويل أي من هذه إلى رسائل. حقيقة أن `LLM` و `ChatModel` يقبلان نفس المدخلات تعني أنه يمكنك تبديلهما مباشرة ببعضهما البعض في معظم السلاسل دون كسر أي شيء، على الرغم من أنه من المهم بالطبع التفكير في كيفية تحويل المدخلات وكيف يمكن أن يؤثر ذلك على أداء النموذج. للتعمق أكثر في النماذج، توجه إلى قسم [نماذج اللغة](/modules/model_io/models/models.md).
 
-## Prompt templates
+## قوالب الأوامر (Prompt templates)
 
-Most LLM applications do not pass user input directly into an `LLM`. Usually they will add the user input to a larger piece of text, called a prompt template, that provides additional context on the specific task at hand.
+معظم تطبيقات LLM لا تمرر مدخلات المستخدم مباشرة إلى `LLM`. عادةً ما تضيف مدخلات المستخدم إلى جزء أكبر من النص، يسمى قالب الأمر (prompt template)، والذي يوفر سياقًا إضافيًا للمهمة المحددة. 
 
-In the previous example, the text we passed to the model contained instructions to generate a company name. For our application, it would be great if the user only had to provide the description of a company/product, without having to worry about giving the model instructions.
+في المثال السابق، النص الذي مررناه إلى النموذج يحتوي على تعليمات لإنشاء اسم شركة. لتطبيقنا، سيكون رائعًا إذا كان على المستخدم فقط تقديم وصف لشركة/منتج، دون الحاجة إلى القلق بشأن إعطاء النموذج تعليمات.
 
-`PromptTemplates` help with exactly this! They bundle up all the logic for going from user input into a fully formatted prompt. This can start off very simple - for example, a prompt to produce the above string would just be:
+تساعد `PromptTemplates` في هذا بالضبط! إنها تجمع كل المنطق للانتقال من مدخلات المستخدم إلى prompt منسق بالكامل. يمكن أن يبدأ هذا بسيطًا جدًا - على سبيل المثال، prompt لإنتاج السلسلة المذكورة أعلاه سيكون:
 
 ```dart
 final prompt = PromptTemplate.fromTemplate(
@@ -117,9 +117,9 @@ print(res);
 // 'What is a good name for a company that makes colorful socks?'
 ```
 
-However, the advantages of using these over raw string formatting are several. You can "partial" out variables - e.g. you can format only some of the variables at a time. You can compose them together, easily combining different templates into a single prompt. For explanations of these functionalities, see the [prompts](/modules/model_io/prompts/prompts.md) for more detail.
+ومع ذلك، فإن مزايا استخدام هذه على تنسيق السلسلة النصية الخام (raw string formatting) عديدة. يمكنك "تجزئة" المتغيرات (partial out variables) - على سبيل المثال، يمكنك تنسيق بعض المتغيرات فقط في كل مرة. يمكنك تجميعها معًا، ودمج القوالب المختلفة بسهولة في prompt واحد. لشرح هذه الوظائف، راجع [prompts](/modules/model_io/prompts/prompts.md) لمزيد من التفاصيل.
 
-`PromptTemplates` can also be used to produce a list of messages. In this case, the prompt not only contains information about the content, but also each message (its role, its position in the list, etc) Here, what happens most often is a `ChatPromptTemplate` is a list of `ChatMessagePromptTemplates`. Each `ChatMessagePromptTemplate` contains instructions for how to format that `ChatMessage` - its role, and then also its content. Let's take a look at this below:
+يمكن أيضًا استخدام `PromptTemplates` لإنتاج قائمة من الرسائل. في هذه الحالة، لا يحتوي الـ prompt على معلومات حول المحتوى فحسب، بل يحتوي أيضًا على كل رسالة (دورها، موقعها في القائمة، إلخ). هنا، ما يحدث غالبًا هو أن `ChatPromptTemplate` عبارة عن قائمة من `ChatMessagePromptTemplates`. يحتوي كل `ChatMessagePromptTemplate` على تعليمات حول كيفية تنسيق `ChatMessage` - دورها، ثم محتواها أيضًا. دعنا نلقي نظرة على هذا أدناه:
 
 ```dart
 const template = 'You are a helpful assistant that translates {input_language} to {output_language}.';
@@ -142,19 +142,19 @@ print(res);
 // ]
 ```
 
-`ChatPromptTemplates` can also be constructed in other ways - see the section on [prompts](/modules/model_io/prompts/prompts.md) for more detail.
+يمكن أيضًا بناء `ChatPromptTemplates` بطرق أخرى - راجع قسم [prompts](/modules/model_io/prompts/prompts.md) لمزيد من التفاصيل.
 
-## Output parsers
+## محللات المخرجات (Output parsers)
 
-`OutputParsers` convert the raw output of an LLM into a format that can be used downstream. There are few main type of `OutputParsers`, including:
+تقوم `OutputParsers` بتحويل المخرجات الخام لـ LLM إلى تنسيق يمكن استخدامه في المراحل اللاحقة. هناك أنواع قليلة رئيسية من `OutputParsers`، بما في ذلك:
 
-- Convert text from LLM -> structured information (e.g. JSON).
-- Convert a `ChatMessage` into just a string.
-- Convert the extra information returned from a call besides the message (like OpenAI function invocation) into a string.
+- تحويل النص من LLM -> معلومات منظمة (على سبيل المثال JSON).
+- تحويل `ChatMessage` إلى سلسلة نصية فقط.
+- تحويل المعلومات الإضافية التي تم إرجاعها من استدعاء بخلاف الرسالة (مثل استدعاء دالة OpenAI) إلى سلسلة نصية.
 
-For full information on this, see the section on [output parsers](/modules/model_io/output_parsers/output_parsers.md).
+للحصول على معلومات كاملة حول هذا، راجع قسم [output parsers](/modules/model_io/output_parsers/output_parsers.md).
 
-In this getting started guide, we will write our own output parser - one that converts a comma separated list into a list.
+في دليل البدء هذا، سنكتب محلل مخرجات خاص بنا - يقوم بتحويل قائمة مفصولة بفواصل إلى قائمة.
 
 ```dart
 class CommaSeparatedListOutputParser 
@@ -188,9 +188,9 @@ print(res);
 // ['hi',  'bye']
 ```
 
-## Composing with LCEL
+## التجميع باستخدام LCEL (Composing with LCEL)
 
-We can now combine all these into one chain. This chain will take input variables, pass those to a prompt template to create a prompt, pass the prompt to a language model, and then pass the output through an (optional) output parser. This is a convenient way to bundle up a modular piece of logic. Let's see it in action!
+يمكننا الآن دمج كل هذه المكونات في سلسلة واحدة. ستأخذ هذه السلسلة متغيرات الإدخال (input variables)، وتمررها إلى قالب أمر (prompt template) لإنشاء prompt، وتمرر الـ prompt إلى نموذج لغة (language model)، ثم تمرر المخرجات عبر محلل مخرجات اختياري (output parser). هذه طريقة ملائمة لتجميع جزء معياري من المنطق. دعنا نراها عمليًا!
 
 ```dart
 const systemTemplate = '''
@@ -215,12 +215,12 @@ final res = await chain.invoke({'text': 'colors'});
 print(res); // ['red', 'blue', 'green', 'yellow', 'orange']
 ```
 
-Note that we are using the `.pipe` syntax (or alternatively the `|` syntax) to join these components together. This syntax is powered by the LangChain Expression Language (LCEL) and relies on the universal `Runnable` interface that all of these objects implement. To learn more about this syntax, read the documentation [here](/expression_language/expression_language.md).
+لاحظ أننا نستخدم صيغة `.pipe` (أو بدلاً من ذلك صيغة `|`) لربط هذه المكونات معًا. يتم تشغيل هذه الصيغة بواسطة LangChain Expression Language (LCEL) وتعتمد على واجهة `Runnable` العالمية التي تنفذها جميع هذه الكائنات. لمعرفة المزيد حول هذه الصيغة، اقرأ الوثائق [هنا](/expression_language/expression_language.md).
 
-## Next steps
+## الخطوات التالية (Next steps)
 
-This is it! We've now gone over how to create the core building block of LangChain applications. There are a lot more features in all three of these than we can cover here. To continue on your journey:
+هذا كل شيء! لقد قمنا الآن بتغطية كيفية إنشاء اللبنة الأساسية لتطبيقات LangChain. هناك العديد من الميزات الأخرى في كل من هذه المكونات الثلاثة أكثر مما يمكننا تغطيته هنا. لمواصلة رحلتك:
 
-- Read up on [LangChain Expression Language](/expression_language/expression_language.md) to learn how to chain these components together.
-- [Dive deeper](/modules/model_io/model_io.md) into LLMs, prompts, and output parsers and learn the other [key components](/modules/modules.md).
-- Explore common [end-to-end use cases](https://python.langchain.com/docs/use_cases).
+- اقرأ عن [LangChain Expression Language](/expression_language/expression_language.md) لمعرفة كيفية ربط هذه المكونات معًا.
+- [تعمق أكثر](/modules/model_io/model_io.md) في LLMs، prompts، ومحللات المخرجات (output parsers) وتعلم [المكونات الرئيسية](/modules/modules.md) الأخرى.
+- استكشف [حالات الاستخدام الشائعة الشاملة](https://python.langchain.com/docs/use_cases).

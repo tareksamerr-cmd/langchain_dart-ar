@@ -1,22 +1,29 @@
-# Installation
+# الـتـنـزيـل
+لبدء استخدام LangChain.dart، تحتاج إلى إضافة التبعية (dependency) المناسبة إلى ملف pubspec.yaml الخاص بمشروعك. اتبع الخطوات التالية:
 
-To get started, add LangChain.dart dependency to your project `pubspec.yaml` file:
+1. إضافة التبعية
+      أضف السطر التالي داخل قسم dependencies في ملف pubspec.yaml:
+   ```yaml
+   dependencies:
+     langchain: {version}
+   ```
+   ملاحظة: استبدل {version} بأحدث إصدار متاح من الحزمة (يمكنك الاطلاع على صفحة الحزمة في pub.dev).
+2. تثبيت الحزمة
+      بعد حفظ الملف، قم بتشغيل الأمر التالي في الطرفية (terminal) لتثبيت الحزمة:
+   ```bash
+   pub get
+   ```
+3. التكامل مع مقدمي النماذج أو قواعد البيانات
+      عادةً ما تحتاج إلى دمج LangChain مع موفري نماذج (مثل OpenAI) أو قواعد بيانات أو واجهات برمجة تطبيقات (APIs) أخرى. لذلك قد تضطر إلى إضافة حزم إضافية.
+   على سبيل المثال، إذا أردت استخدام واجهات OpenAI، فيجب إضافة حزمة langchain_openai أيضاً:
+   ```yaml
+   dependencies:
+     langchain: {version}
+     langchain_openai: {version}
+   ```
+4. الحزم المتاحة
+      لمعرفة قائمة بجميع الحزم المتاحة (مثل التكاملات مع مختلف مقدمي الخدمات)، يُرجى زيارة قسم packages في المستودع الرسمي.
 
-```yaml
-dependencies:
-  langchain: {version}
-```
+---
 
-Then, run `pub get` to install the package.
-
-Using LangChain will usually require integrations with one or more model providers, data stores, tools APIs, etc.
-
-For example, if you wan to use OpenAI’s APIs, you will need to add LangChain.dart OpenAI package as well:
-
-```yaml
-dependencies:
-  langchain: {version}
-  langchain_openai: {version}
-```
-
-Check out the [packages](https://github.com/davidmigloz/langchain_dart/tree/main#packages) section for a list of available packages.
+بهذا تكون قد أتممت إعداد LangChain.dart بنجاح، وأصبحت جاهزاً لاستخدامه في مشروعك.

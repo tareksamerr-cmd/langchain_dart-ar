@@ -1,5 +1,5 @@
 .sidebar>h1 {
-    text-align: left;
+    text-align: right;
     margin: 0 0 15px 15px;
     color: var(--accent);
 }

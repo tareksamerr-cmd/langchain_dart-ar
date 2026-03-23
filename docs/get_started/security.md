@@ -1,27 +1,29 @@
-# Security
+# الأمان (Security)
 
-LangChain has a large ecosystem of integrations with various external resources like local and remote file systems, APIs and databases. These integrations allow developers to create versatile applications that combine the power of LLMs with the ability to access, interact with and manipulate external resources.
+في LangChain، هناك نظام بيئي كبير من التكاملات مع موارد خارجية متنوعة، مثل أنظمة الملفات المحلية والبعيدة، وواجهات برمجة التطبيقات (APIs)، وقواعد البيانات. تسمح هذه التكاملات للمطورين ببناء تطبيقات متعددة الاستخدامات تجمع بين قوة نماذج اللغة الكبيرة (LLMs) والقدرة على الوصول إلى الموارد الخارجية والتفاعل معها والتلاعب بها.
 
-## Best Practices
+## أفضل الممارسات (Best Practices)
 
-When building such applications developers should remember to follow good security practices:
+### عند بناء مثل هذه التطبيقات، يجب على المطورين اتباع ممارسات أمنية سليمة:
 
-- **[Limit Permissions](https://en.wikipedia.org/wiki/Principle_of_least_privilege)**: Scope permissions specifically to the application's need. Granting broad or excessive permissions can introduce significant security vulnerabilities. To avoid such vulnerabilities, consider using read-only credentials, disallowing access to sensitive resources, using sandboxing techniques (such as running inside a container), etc. as appropriate for your application.
-- **Anticipate Potential Misuse**: Just as humans can err, so can Large Language Models (LLMs). Always assume that any system access or credentials may be used in any way allowed by the permissions they are assigned. For example, if a pair of database credentials allows deleting data, it’s safest to assume that any LLM able to use those credentials may in fact delete data.
-- **[Defense in Depth](https://en.wikipedia.org/wiki/Defense_in_depth_(computing))**: No security technique is perfect. Fine-tuning and good chain design can reduce, but not eliminate, the odds that a Large Language Model (LLM) may make a mistake. It’s best to combine multiple layered security approaches rather than relying on any single layer of defense to ensure security. For example: use both read-only permissions and sandboxing to ensure that LLMs are only able to access data that is explicitly meant for them to use.
+- تحديد الصلاحيات بأقل قدر ممكن (Limit Permissions): يجب أن تكون الصلاحيات محددة بدقة بحسب احتياج التطبيق فقط. منح صلاحيات واسعة أو مفرطة قد يسبب ثغرات أمنية خطيرة. لتجنب ذلك، يمكن استخدام بيانات اعتماد (credentials) للقراءة فقط، ومنع الوصول إلى الموارد الحساسة، واستخدام تقنيات العزل (مثل التشغيل داخل حاوية container) حسب ما يناسب تطبيقك.
+- توقع سوء الاستخدام المحتمل (Anticipate Potential Misuse) : كما يمكن للبشر أن يخطئوا، كذلك يمكن لنماذج اللغة الكبيرة (LLMs) أن تخطئ. افترض دائمًا أن أي وصول للنظام أو أي بيانات اعتماد قد تُستخدم بأي طريقة تسمح بها الصلاحيات الممنوحة. على سبيل المثال، إذا كانت صلاحيات قاعدة البيانات تسمح بحذف البيانات، فمن الأفضل أن تفترض أن أي نموذج LLM قادر على استخدام هذه الصلاحيات قد يقوم فعلًا بحذف البيانات.
+- الدفاع متعدد الطبقات (Defense in Depth) : لا توجد تقنية أمنية مثالية. يمكن للضبط الدقيق (fine-tuning) وتصميم السلاسل (chain design) الجيد أن يقلل - وليس يلغي - احتمال ارتكاب نموذج اللغة الكبيرة (LLM) لخطأ. من الأفضل الجمع بين عدة طبقات أمنية بدلًا من الاعتماد على طبقة دفاع واحدة فقط لضمان الأمان. على سبيل المثال: استخدم صلاحيات القراءة فقط (read-only permissions) مع تقنيات العزل (sandboxing) لضمان أن نماذج LLM لا يمكنها الوصول إلا إلى البيانات المخصصة لها صراحة.
 
-Risks of not doing so include, but are not limited to:
-- Data corruption or loss.
-- Unauthorized access to confidential information.
-- Compromised performance or availability of critical resources.
+### مخاطر عدم الالتزام بذلك تشمل - على سبيل المثال لا الحصر:
 
-Example scenarios with mitigation strategies:
-- A user may ask an agent with access to the file system to delete files that should not be deleted or read the content of files that contain sensitive information. To mitigate, limit the agent to only use a specific directory and only allow it to read or write files that are safe to read or write. Consider further sandboxing the agent by running it in a container.
-- A user may ask an agent with write access to an external API to write malicious data to the API, or delete data from that API. To mitigate, give the agent read-only API keys, or limit it to only use endpoints that are already resistant to such misuse.
-- A user may ask an agent with access to a database to drop a table or mutate the schema. To mitigate, scope the credentials to only the tables that the agent needs to access and consider issuing READ-ONLY credentials.
+- تلف أو فقدان البيانات.
+- وصول غير مصرح به إلى معلومات سرية.
+- ضعف في الأداء أو توافر الموارد الحيوية.
 
-If you're building applications that access external resources like file systems, APIs or databases, consider speaking with your company's security team to determine how to best design and secure your applications.
+### أمثلة على سيناريوهات مع استراتيجيات التخفيف:
 
-## Reporting a Vulnerability
+- قد يطلب مستخدم من وكيل (agent) لديه صلاحية الوصول إلى نظام الملفات حذف ملفات لا ينبغي حذفها، أو قراءة محتوى ملفات تحتوي على معلومات حساسة. للتخفيف، قم بتقييد الوكيل لاستخدام دليل محدد فقط، واسمح له بقراءة أو كتابة الملفات الآمنة فقط. ويمكن تعزيز العزل بتشغيل الوكيل داخل حاوية (container).
+- قد يطلب مستخدم من وكيل لديه صلاحية الكتابة إلى واجهة برمجة تطبيقات (API) خارجية كتابة بيانات ضارة إلى الـ API، أو حذف بيانات منها. للتخفيف، أعط الوكيل مفاتيح API للقراءة فقط، أو قيده لاستخدام نقاط النهاية (endpoints) التي تقاوم هذا النوع من سوء الاستخدام.
+- قد يطلب مستخدم من وكيل لديه صلاحية الوصول إلى قاعدة البيانات إسقاط جدول (drop table) أو تغيير مخطط قاعدة البيانات (schema). للتخفيف، حدد الصلاحيات على الجداول التي يحتاج الوكيل الوصول إليها فقط، وفكر في استخدام بيانات اعتماد للقراءة فقط (READ-ONLY credentials).
 
-Please report security vulnerabilities via [GitHub Security](https://github.com/davidmigloz/langchain_dart/security). This will ensure the issue is promptly triaged and acted upon as needed.
+إذا كنت تبني تطبيقات تصل إلى موارد خارجية مثل أنظمة الملفات، أو واجهات برمجة التطبيقات (APIs)، أو قواعد البيانات، ففكر في التواصل مع فريق الأمن في شركتك لتحديد أفضل طريقة لتصميم وتأمين تطبيقاتك.
+
+## الإبلاغ عن ثغرة أمنية (Reporting a Vulnerability)
+
+يرجى الإبلاغ عن الثغرات الأمنية عبر GitHub Security. هذا يضمن معالجة المشكلة بسرعة واتخاذ الإجراءات اللازمة.

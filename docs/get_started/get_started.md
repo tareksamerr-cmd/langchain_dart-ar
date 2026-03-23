@@ -1,6 +1,6 @@
-# Get started
+# لـنـبـدأ
 
-Get started with LangChain:
+إبدأ مع LangChain :
 
-- [Installation](/get_started/installation.md)
-- [Quickstart](/get_started/quickstart.md)
+- [التنزيل](/get_started/installation.md)
+- [بداية سريعة](/get_started/quickstart.md)

@@ -1,8 +1,8 @@
-# Passthrough: Passing inputs through
+# Passthrough: تمرير المدخلات كما هي
 
-`RunnablePassthrough` on its own allows you to pass inputs unchanged. This typically is used in conjunction with `RunnableMap` to pass data through to a new key in the map.
+يسمح لك `RunnablePassthrough` بمفرده بتمرير المدخلات دون تغيير. يُستخدم هذا عادةً بالاقتران مع `RunnableMap` لتمرير البيانات إلى مفتاح جديد في الخريطة.
 
-See the example below:
+انظر المثال أدناه:
 
 ```dart
 final runnable = Runnable.fromMap<Map<String, dynamic>>({
@@ -15,13 +15,13 @@ print(res);
 // {passed: {num: 1}, modified: 2}
 ```
 
-As seen above, `passed` key was called with `RunnablePassthrough` and so it simply passed on `{'num': 1}`.
+كما رأينا أعلاه، تم استدعاء المفتاح `passed` باستخدام `RunnablePassthrough` وبالتالي قام ببساطة بتمرير `{'num': 1}`.
 
-We also set a second key in the map with `modified`. This uses a map input to set a single value adding 1 to the num, which resulted in `modified` key with the value of 2.
+لقد قمنا أيضًا بتعيين مفتاح ثانٍ في الخريطة باسم `modified`. يستخدم هذا إدخال خريطة لتعيين قيمة واحدة بإضافة 1 إلى الرقم، مما أدى إلى المفتاح `modified` بقيمة 2.
 
-## Retrieval Example
+## مثال الاسترجاع (Retrieval Example)
 
-In the example below, we see a use case where we use `RunnablePassthrough` along with `RunnableMap`.
+في المثال أدناه، نرى حالة استخدام حيث نستخدم `RunnablePassthrough` جنبًا إلى جنب مع `RunnableMap`.
 
 ```dart
 final vectorStore = MemoryVectorStore(
@@ -51,4 +51,4 @@ print(res);
 // David created LangChain.dart.
 ```
 
-Here the input to prompt is expected to be a map with keys “context” and “question”. The user input is just the question. So we need to get the context using our retriever and passthrough the user input under the “question” key. In this case, the RunnablePassthrough allows us to pass on the user’s question to the prompt and model.
+هنا، من المتوقع أن يكون إدخال المطالبة عبارة عن خريطة تحتوي على مفتاحين "context" و "question". إدخال المستخدم هو السؤال فقط. لذلك نحتاج إلى الحصول على السياق باستخدام المسترجع (retriever) الخاص بنا وتمرير إدخال المستخدم تحت المفتاح "question". في هذه الحالة، يسمح لنا `RunnablePassthrough` بتمرير سؤال المستخدم إلى المطالبة والنموذج.

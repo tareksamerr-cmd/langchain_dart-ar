@@ -1,12 +1,12 @@
-# RunnableRetry : Retrying Runnables
+# RunnableRetry: إعادة محاولة Runnables
 
-`RunnableRetry` wraps a `Runnable` and retries it if it fails. It be created using `runnable.withRetry()`. 
+`RunnableRetry` يغلف `Runnable` ويعيد محاولته إذا فشل. يمكن إنشاؤه باستخدام `runnable.withRetry()`.
 
-By default, the runnable will be retried 3 times with exponential backoff strategy.
+بشكل افتراضي، ستتم إعادة محاولة `runnable` 3 مرات باستراتيجية التراجع الأسي (exponential backoff).
 
-## Usage
+## الاستخدام
 
-## Creating a RunnableRetry
+## إنشاء RunnableRetry
 
 ```dart
 final model = ChatOpenAI();
@@ -17,11 +17,11 @@ final res = await modelWithRetry.invoke(input);
 print(res);
 ```
 
-## Retrying a chain
+## إعادة محاولة سلسلة (Retrying a chain)
 
-`RunnableRetry` can be used to retry any `Runnable`, including a chain of `Runnable`s.
+يمكن استخدام `RunnableRetry` لإعادة محاولة أي `Runnable`، بما في ذلك سلسلة من `Runnable`s.
 
-Example
+مثال
 
 ```dart
 final promptTemplate = ChatPromptTemplate.fromTemplate('tell me a joke about {topic}');
@@ -39,9 +39,9 @@ final res = await chain.batch(
 print(res);
 ```
 
-> In general, it's best to keep the scope of the retry as small as possible.
+> بشكل عام، من الأفضل إبقاء نطاق إعادة المحاولة (retry) صغيرًا قدر الإمكان.
 
-## Configuring the retry
+## تكوين إعادة المحاولة (Configuring the retry)
 
 ```dart
 // passing a fake model to cause Exception
@@ -72,9 +72,9 @@ print(res);
 // }) 
 ```
 
-## Passing delay durations
+## تمرير فترات التأخير (Passing delay durations)
 
-If you want to use custom delay durations for each retry attempt, you can pass a list of `Duration` objects to the `delayDurations` parameter.
+إذا كنت ترغب في استخدام فترات تأخير مخصصة لكل محاولة إعادة، يمكنك تمرير قائمة من كائنات `Duration` إلى معلمة `delayDurations`.
 
 ```dart
 final input = PromptValue.string('Explain why sky is blue in 2 lines');

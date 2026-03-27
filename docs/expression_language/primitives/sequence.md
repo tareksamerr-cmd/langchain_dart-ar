@@ -1,12 +1,14 @@
-# RunnableSequence: Chaining runnables
+---
+title : ربط المكونات القابلة للتنفيذ
+---
 
-One key advantage of the `Runnable` interface is that any two runnables can be “chained” together into sequences. The output of the previous runnable’s `.invoke()` call is passed as input to the next runnable. This can be done using the `.pipe()` method (or the `|` operator, which is a convenient shorthand for `.pipe()`). The resulting `RunnableSequence` is itself a runnable, which means it can be invoked, streamed, or piped just like any other runnable.
+إحدى المزايا الرئيسية لواجهة `Runnable` هي إمكانية “ربط” أي مكونين قابلين للتنفيذ معًا في تسلسل. يتم تمرير مخرجات استدعاء `.invoke()` للمكون السابق كمدخل للمكون التالي. يمكن فعل ذلك باستخدام الدالة `.pipe()` (أو العامل `|`، وهو اختصار مناسب لـ `.pipe()`). الناتج `RunnableSequence` هو بحد ذاته مكون قابل للتنفيذ، مما يعني أنه يمكن استدعاؤه أو تدفقه أو ربطه مثل أي مكون قابل للتنفيذ آخر.
 
-> Note: when using the `|` operator, the output type of the last runnable is always resolved to `Object` because of [Dart limitations](https://github.com/dart-lang/language/issues/1044). If you need to preserve the output type, use the `.pipe()` method instead.
+> ملاحظة: عند استخدام العامل `|`، يتم دائمًا تحديد نوع مخرجات المكون الأخير على أنه `Object` بسبب [قيود لغة Dart](https://github.com/dart-lang/language/issues/1044). إذا كنت بحاجة إلى الحفاظ على نوع المخرجات، استخدم الدالة `.pipe()` بدلاً من ذلك.
 
-## The pipe operator
+## عامل الربط
 
-To show off how this works, let’s go through an example. We’ll walk through a common pattern in LangChain: using a prompt template to format input into a chat model, and finally converting the chat message output into a string with an output parser.
+لتوضيح كيفية عمل ذلك، دعنا نمر بمثال. سنستعرض نمطًا شائعًا في LangChain: استخدام قالب تعليمات (prompt template) لتنسيق المدخلات إلى نموذج محادثة، ثم تحويل مخرجات رسالة الدردشة إلى نص باستخدام محلل المخرجات.
 
 ```dart
 final promptTemplate = ChatPromptTemplate.fromTemplate(
@@ -18,7 +20,7 @@ const outputParser = StringOutputParser<ChatResult>();
 final chain = promptTemplate.pipe(model).pipe(outputParser);
 ```
 
-Prompts and models are both runnable, and the output type from the prompt call is the same as the input type of the chat model, so we can chain them together. We can then invoke the resulting sequence like any other runnable:
+كل من القوالب والنماذج قابلة للتنفيذ، ونوع المخرجات من استدعاء القالب هو نفسه نوع المدخلات لنموذج الدردشة، لذا يمكننا ربطهما معًا. يمكننا بعد ذلك استدعاء التسلسل الناتج مثل أي مكون قابل للتنفيذ:
 
 ```dart
 final res = await chain.invoke({'topic': 'bears'});
@@ -27,13 +29,13 @@ print(res);
 // Because they have bear feet!
 ```
 
-## Formatting inputs & output
+تنسيق المدخلات والمخرجات
 
-We can even combine this chain with more runnables to create another chain. This may involve some input/output formatting using other types of runnables, depending on the required inputs and outputs of the chain components.
+يمكننا دمج هذا التسلسل مع مكونات أخرى قابلة للتنفيذ لإنشاء تسلسل آخر. قد يتضمن ذلك بعض تنسيق المدخلات والمخرجات باستخدام أنواع أخرى من المكونات القابلة للتنفيذ، حسب المدخلات والمخرجات المطلوبة لمكونات التسلسل.
 
-For example, let’s say we wanted to compose the joke generating chain with another chain that evaluates whether the generated joke was funny.
+على سبيل المثال، لنفترض أننا نريد دمج تسلسل إنشاء النكات مع تسلسل آخر يقيّم ما إذا كانت النكتة الناتجة مضحكة.
 
-We would need to be careful with how we format the input into the next chain. In the below example, we use a `RunnableMap` which runs all of its values concurrently and returns a map with the results which can then be passed to the prompt template.
+سنحتاج إلى توخي الحذر في كيفية تنسيق المدخلات للتسلسل التالي. في المثال أدناه، نستخدم RunnableMap الذي يقوم بتنفيذ جميع قيمه بشكل متزامن ويعيد خريطة تحتوي على النتائج، والتي يمكن بعد ذلك تمريرها إلى قالب التعليمات.
 
 ```dart
 final analysisPrompt = ChatPromptTemplate.fromTemplate(
@@ -48,7 +50,7 @@ print(res1);
 // Some people may find this joke funny, especially if they enjoy puns or wordplay...
 ```
 
-Instead of using `Runnable.fromMap`, we can use the convenience method `Runnable.getMapFromInput` which will automatically create a `RunnableMap` placing the input value into the map with the key specified.
+بدلاً من استخدام Runnable.fromMap، يمكننا استخدام الطريقة المساعدة Runnable.getMapFromInput التي تنشئ تلقائيًا RunnableMap وتضع قيمة الإدخال في الخريطة بالمفتاح المحدد.
 
 ```dart
 final composedChain2 = chain
@@ -58,7 +60,7 @@ final composedChain2 = chain
     .pipe(outputParser);
 ```
 
-Another option is to use `Runnable.mapInput` which allows to transform the input value using the provided function.
+خيار آخر هو استخدام Runnable.mapInput الذي يتيح تحويل قيمة الإدخال باستخدام الدالة المقدمة.
 
 ```dart
 final composedChain3 = chain
@@ -68,10 +70,12 @@ final composedChain3 = chain
     .pipe(outputParser);
 ```
 
-## Runnable.fromList
+Runnable.fromList
 
-You can also create a `RunnableSequence` from a list of runnables using `Runnable.fromList`. 
+يمكنك أيضًا إنشاء RunnableSequence من قائمة من المكونات القابلة للتنفيذ باستخدام Runnable.fromList.
 
 ```dart
 final chain = Runnable.fromList([promptTemplate, chatModel]);
+```
+
 ```

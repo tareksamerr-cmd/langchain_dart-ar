@@ -1,10 +1,10 @@
-# RunnableMap: Formatting inputs & concurrency
+# RunnableMap: تنسيق المدخلات والتزامن
 
-The `RunnableMap` primitive is essentially a map whose values are runnables. It runs all of its values concurrently, and each value is called with the overall input of the `RunnableMap`. The final return value is a map with the results of each value under its appropriate key.
+إن `RunnableMap` هو في الأساس خريطة (map) تكون قيمها عبارة عن "runnables". يقوم بتشغيل جميع قيمه بشكل متزامن، ويتم استدعاء كل قيمة مع الإدخال الكلي لـ `RunnableMap`. القيمة النهائية التي يتم إرجاعها هي خريطة تحتوي على نتائج كل قيمة تحت مفتاحها المناسب.
 
-It is useful for running operations concurrently, but can also be useful for manipulating the output of one `Runnable` to match the input format of the next `Runnable` in a sequence.
+إنه مفيد لتشغيل العمليات بشكل متزامن، ولكنه يمكن أن يكون مفيدًا أيضًا لمعالجة إخراج "Runnable" واحد ليتناسب مع تنسيق إدخال "Runnable" التالي في التسلسل.
 
-Here the input to prompt is expected to be a map with keys “context” and “question”. The user input is just the question. So we need to get the context using our retriever and passthrough the user input under the “question” key.
+هنا، من المتوقع أن يكون إدخال الموجه (prompt) عبارة عن خريطة تحتوي على المفتاحين "context" و "question". إدخال المستخدم هو السؤال فقط. لذلك نحتاج إلى الحصول على السياق باستخدام المسترجع (retriever) الخاص بنا وتمرير إدخال المستخدم تحت مفتاح "question".
 
 ```dart
 final vectorStore = MemoryVectorStore(
@@ -34,9 +34,9 @@ print(res);
 // David created LangChain.dart.
 ```
 
-## Using Runnable.getItemFromMap as shorthand
+## استخدام Runnable.getItemFromMap كاختصار
 
-Sometimes you need to extract one value from a map and pass it to the next `Runnable`. You can use `Runnable.getItemFromMap` to do this. It takes the input map and returns the value of the provided key.
+أحيانًا تحتاج إلى استخراج قيمة واحدة من خريطة وتمريرها إلى "Runnable" التالي. يمكنك استخدام `Runnable.getItemFromMap` للقيام بذلك. يأخذ خريطة الإدخال ويعيد قيمة المفتاح المقدم.
 
 ```dart
 final vectorStore = MemoryVectorStore(
@@ -76,9 +76,9 @@ print(res);
 // David portó LangChain a Dart en LangChain.dart
 ```
 
-## Running steps concurrently
+## تشغيل الخطوات بشكل متزامن
 
-`RunnableMap` makes it easy to execute multiple `Runnables` concurrently and to return the output of these Runnables as a map.
+يجعل `RunnableMap` من السهل تنفيذ عدة "Runnables" بشكل متزامن وإرجاع إخراج هذه "Runnables" كخريطة.
 
 ```dart
 final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
@@ -106,4 +106,4 @@ print(res);
 //  poem: In the forest's hush, the bear prowls wide, A silent guardian, a force of nature's pride.}
 ```
 
-Each branch of the `RunnableMap` is still run on the same isolate, but they are run concurrently. In the example above, the two requests to the OpenAI API are made concurrently, without waiting for the first to finish before starting the second.
+يتم تشغيل كل فرع من `RunnableMap` على نفس المعزل (isolate)، ولكن يتم تشغيلها بشكل متزامن. في المثال أعلاه، يتم إجراء الطلبين إلى OpenAI API بشكل متزامن، دون انتظار انتهاء الأول قبل بدء الثاني.

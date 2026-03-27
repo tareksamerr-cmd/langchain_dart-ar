@@ -1,12 +1,12 @@
-# Mapper: Mapping input values
+# Mapper: ربط قيم الإدخال
 
-It is common to need to map the output value of a previous runnable to a new value that conforms to the input requirements of the next runnable. This is where `Runnable.mapInput` comes in.
+من الشائع أن نحتاج إلى ربط (mapping) قيمة الإخراج لـ "Runnable" سابق بقيمة جديدة تتوافق مع متطلبات الإدخال لـ "Runnable" التالي. هنا يأتي دور `Runnable.mapInput`.
 
 ## Runnable.mapInput
 
-`Runnable.mapInput` allows you to define a function that maps the input value to a new value.
+يسمح لك `Runnable.mapInput` بتعريف دالة تربط (maps) قيمة الإدخال بقيمة جديدة.
 
-In the following example, we retrieve a list of `Document` objects from our vector store, and we want to combine them into a single string to feed it in our prompt. To do this, we use `Runnable.mapInput` to implement the combination logic.
+في المثال التالي، نسترجع قائمة من كائنات `Document` من مخزن المتجهات (vector store) الخاص بنا، ونريد دمجها في سلسلة نصية واحدة لتغذيتها في الموجه (prompt) الخاص بنا. للقيام بذلك، نستخدم `Runnable.mapInput` لتطبيق منطق الدمج.
 
 ```dart
 final vectorStore = MemoryVectorStore(
@@ -46,9 +46,9 @@ print(res);
 
 ## Runnable.mapInputStream
 
-By default, when running a chain using `stream` instead of `invoke`, `Runnable.mapInput` will be called for every item in the input stream. If you need more control over the input stream, you can use `Runnable.mapInputStream` instead which takes the input stream as a parameter and returns a new stream.
+افتراضيًا، عند تشغيل سلسلة (chain) باستخدام `stream` بدلاً من `invoke`، سيتم استدعاء `Runnable.mapInput` لكل عنصر في تدفق الإدخال (input stream). إذا كنت بحاجة إلى مزيد من التحكم في تدفق الإدخال، يمكنك استخدام `Runnable.mapInputStream` بدلاً من ذلك، والذي يأخذ تدفق الإدخال كمعامل ويعيد تدفقًا جديدًا.
 
-In the following example, the model streams the output in chunks and the output parser processes each of them individually. However, we want our chain to output only only the last chunk. We can use `Runnable.mapInputStream` to get the last chunk from the input stream.
+في المثال التالي، يقوم النموذج ببث الإخراج في أجزاء (chunks) ويقوم محلل الإخراج (output parser) بمعالجة كل منها على حدة. ومع ذلك، نريد أن تقوم سلسلتنا بإخراج الجزء الأخير فقط. يمكننا استخدام `Runnable.mapInputStream` للحصول على الجزء الأخير من تدفق الإدخال.
 
 ```dart
 final model = ChatOpenAI(
@@ -76,13 +76,13 @@ await stream.forEach((final chunk) => print('$chunk|'));
 // {countries: [{name: France, population: 65273511}, {name: Spain, population: 46754778}, {name: Japan, population: 126476461}]}|
 ```
 
-> Note: for more complex use-cases where you want to define separate logic for when the chain is run using `invoke` or `stream`, you can use `Runnable.function`.
+> ملاحظة: لحالات الاستخدام الأكثر تعقيدًا حيث تريد تعريف منطق منفصل عند تشغيل السلسلة باستخدام `invoke` أو `stream`، يمكنك استخدام `Runnable.function`.
 
 ## Runnable.getItemFromMap
 
-Sometimes the previous runnable returns a map, and you want to get a value from it to feed it to the next runnable. You can use `Runnable.getItemFromMap` to get a value from an input map.
+أحيانًا يُرجع "Runnable" السابق خريطة (map)، وتريد الحصول على قيمة منها لتغذيتها إلى "Runnable" التالي. يمكنك استخدام `Runnable.getItemFromMap` للحصول على قيمة من خريطة الإدخال.
 
-In the following example, we want to feed to our retriever the question but the input is a map with several other values. We can use `Runnable.getItemFromMap` to get the question from the input map, as well as to propagate the other values to the next runnable.
+في المثال التالي، نريد تغذية "retriever" بالسؤال، ولكن الإدخال عبارة عن خريطة تحتوي على عدة قيم أخرى. يمكننا استخدام `Runnable.getItemFromMap` للحصول على السؤال من خريطة الإدخال، وكذلك لنشر القيم الأخرى إلى "Runnable" التالي.
 
 ```dart
 final retrievalChain = Runnable.fromMap<Map<String, dynamic>>({
@@ -99,14 +99,13 @@ print(res);
 // David portó LangChain a Dart en LangChain.dart
 ```
 
-> Note: this is equivalent to  
-> `Runnable.mapInput<Map<String, dynamic>, RunOutput>((input) => input[key])`
+> ملاحظة: هذا يعادل `Runnable.mapInput<Map<String, dynamic>, RunOutput>((input) => input[key])`
 
 ## Runnable.getMapFromInput
 
-Sometimes the previous runnable returns a single item, but the next runnable expects a map. You can use `Runnable.getMapFromInput` to format the input for the next runnable.
+أحيانًا يُرجع "Runnable" السابق عنصرًا واحدًا، ولكن "Runnable" التالي يتوقع خريطة. يمكنك استخدام `Runnable.getMapFromInput` لتنسيق الإدخال لـ "Runnable" التالي.
 
-In the following example, we want our chain input type to be a String, but the prompt template expects a map. We can use `Runnable.getMapFromInput` to format the input for the prompt template.
+في المثال التالي، نريد أن يكون نوع إدخال سلسلتنا (chain) عبارة عن سلسلة نصية (String)، ولكن قالب الموجه (prompt template) يتوقع خريطة. يمكننا استخدام `Runnable.getMapFromInput` لتنسيق الإدخال لقالب الموجه.
 
 ```dart
 final model = ChatOpenAI(apiKey: openaiApiKey);
@@ -138,5 +137,4 @@ print(res);
 // \(x = \sqrt[3]{5}\)
 ```
 
-> Note: this is equivalent to  
-> `Runnable.mapInput<RunInput, Map<String, dynamic>>((input) => {key: input})`
+> ملاحظة: هذا يعادل `Runnable.mapInput<RunInput, Map<String, dynamic>>((input) => {key: input})`

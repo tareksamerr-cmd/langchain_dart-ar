@@ -1,14 +1,14 @@
-# Dynamically route logic based on input
+# توجيه المنطق ديناميكيًا بناءً على الإدخال
 
-This notebook covers how to do routing in the LangChain Expression Language.
+توضح هذه المفكرة كيفية إجراء التوجيه (routing) في لغة تعبير LangChain (LangChain Expression Language).
 
-Routing allows you to create non-deterministic chains where the output of a previous step defines the next step. Routing helps provide structure and consistency around interactions with LLMs.
+يسمح لك التوجيه بإنشاء سلاسل غير حتمية حيث يحدد إخراج خطوة سابقة الخطوة التالية. يساعد التوجيه في توفير بنية واتساق حول التفاعلات مع نماذج اللغة الكبيرة (LLMs).
 
-## Using RunnableRouter
+## استخدام RunnableRouter
 
-We’ll illustrate how to perform routing using a two-step sequence where the first step classifies an input question as being about LangChain, Anthropic, or Other, then routes to a corresponding prompt chain.
+سنوضح كيفية إجراء التوجيه باستخدام تسلسل من خطوتين حيث تصنف الخطوة الأولى سؤال الإدخال على أنه يتعلق بـ LangChain أو Anthropic أو غير ذلك، ثم توجه إلى سلسلة موجه (prompt chain) مقابلة.
 
-First, let’s create a chain that will identify incoming questions as being about `LangChain`, `Anthropic`, or `Other`:
+أولاً، دعنا ننشئ سلسلة تحدد الأسئلة الواردة على أنها تتعلق بـ `LangChain` أو `Anthropic` أو `Other`:
 
 ```dart
 final chatModel = ChatOllama(
@@ -34,7 +34,7 @@ print(res1);
 // Anthropic
 ```
 
-Now, let’s create three sub-chains:
+الآن، دعنا ننشئ ثلاث سلاسل فرعية:
 
 ```dart
 final langchainChain = PromptTemplate.fromTemplate('''
@@ -63,9 +63,9 @@ Answer:
   ''') | chatModel | StringOutputParser();
 ```
 
-`RunnableRouter` is a type of runnable that takes a function that routes the input to a specific `Runnable`. You can use `Runnable.fromRouter` to create a `RunnableRouter`.
+`RunnableRouter` هو نوع من "runnable" يأخذ دالة توجه الإدخال إلى `Runnable` معين. يمكنك استخدام `Runnable.fromRouter` لإنشاء `RunnableRouter`.
 
-In this example, we will return one of the three chains we defined earlier based on the topic returned by the classification chain.
+في هذا المثال، سنقوم بإرجاع إحدى السلاسل الثلاث التي عرفناها سابقًا بناءً على الموضوع الذي تم إرجاعه بواسطة سلسلة التصنيف.
 
 ```dart
 final router = Runnable.fromRouter((Map<String, dynamic> input, _) {
@@ -103,11 +103,11 @@ print(res4);
 // The answer is... 4!
 ```
 
-## Routing by semantic similarity
+## التوجيه بالتشابه الدلالي (semantic similarity)
 
-One especially useful technique is to use embeddings to route a query to the most relevant prompt. 
+إحدى التقنيات المفيدة بشكل خاص هي استخدام التضمينات (embeddings) لتوجيه الاستعلام إلى الموجه الأكثر صلة.
 
-Here’s an example where we have two specialized prompts, one for physics and one for history. We will use embeddings to determine which prompt is best suited to answer a given question.
+إليك مثال حيث لدينا موجهان متخصصان، أحدهما للفيزياء والآخر للتاريخ. سنستخدم التضمينات لتحديد أي موجه هو الأنسب للإجابة على سؤال معين.
 
 ```dart
 const physicsTemplate = '''

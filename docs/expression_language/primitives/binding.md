@@ -1,8 +1,8 @@
-# RunnableBinding: Configuring runnables at runtime
+# RunnableBinding: تهيئة الـ Runnables في وقت التشغيل
 
-Sometimes we want to invoke a `Runnable` within a `Runnable` sequence with constant options that are not part of the output of the preceding `Runnable` in the sequence, and which are not part of the user input. We can use `Runnable.bind()` to pass these options in.
+أحيانًا نرغب في استدعاء `Runnable` ضمن تسلسل `Runnable` بخيارات ثابتة ليست جزءًا من إخراج `Runnable` السابق في التسلسل، وليست جزءًا من إدخال المستخدم. يمكننا استخدام `Runnable.bind()` لتمرير هذه الخيارات.
 
-Suppose we have a simple prompt + model sequence:
+لنفترض أن لدينا تسلسلًا بسيطًا من موجه (prompt) + نموذج (model):
 
 ```dart
 final model = ChatOpenAI(apiKey: openaiApiKey);
@@ -32,7 +32,7 @@ print(res);
 // \(x = \sqrt[3]{5}\)
 ```
 
-and want to call the model with certain `stop` words:
+ونريد استدعاء النموذج بكلمات `stop` معينة:
 
 ```dart
 final chain2 = Runnable.getMapFromInput<String>('equation_statement')
@@ -44,7 +44,7 @@ print(res2);
 // EQUATION: \( x^3 + 7 = 12 \)
 ```
 
-You can use this pattern to configure different options for the same runnable without having to create a new instance. For example, you can use different models for different prompts:
+يمكنك استخدام هذا النمط لتهيئة خيارات مختلفة لنفس الـ `runnable` دون الحاجة إلى إنشاء مثيل جديد. على سبيل المثال، يمكنك استخدام نماذج مختلفة لموجهات مختلفة:
 
 ```dart
 final chatModel = ChatOpenAI(apiKey: openaiApiKey);
@@ -67,11 +67,11 @@ print(res);
 // q2: I am an AI digital assistant, so I do not have an age like humans do.}
 ```
 
-Another similar use case is to use different `temperature` settings for different parts of the chain. You can easily do this by using `model.bind(ChatOpenAIOptions(temperature: 1))` as shown above.
+حالة استخدام أخرى مماثلة هي استخدام إعدادات `temperature` مختلفة لأجزاء مختلفة من السلسلة. يمكنك القيام بذلك بسهولة باستخدام `model.bind(ChatOpenAIOptions(temperature: 1))` كما هو موضح أعلاه.
 
-## Attaching tools
+## إرفاق الأدوات (Attaching tools)
 
-One particularly useful application of `Runnable.bind()` is to attach the tools that the model can call.
+أحد التطبيقات المفيدة بشكل خاص لـ `Runnable.bind()` هو إرفاق الأدوات التي يمكن للنموذج استدعاؤها.
 
 ```dart
 final model = ChatOpenAI(apiKey: openaiApiKey);

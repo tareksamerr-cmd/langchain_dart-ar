@@ -1,25 +1,25 @@
-# Function: Run custom logic
+# الدالة: تشغيل منطق مخصص
 
-As we discussed in the [Mapper: Mapping input values](/expression_language/primitives/map.md) section, it is common to need to map the output value of a previous runnable to a new value that conforms to the input requirements of the next runnable. `Runnable.mapInput`, `Runnable.mapInputStream`, `Runnable.getItemFromMap`, and `Runnable.getMapFromInput` are the easiest way to do that with minimal boilerplate. However, sometimes you may need more control over the input and output values. This is where `Runnable.fromFunction` comes in.
+كما ناقشنا في قسم [Mapper: Mapping input values](/expression_language/primitives/map.md)، من الشائع أن نحتاج إلى ربط قيمة الإخراج لـ `Runnable` سابق بقيمة جديدة تتوافق مع متطلبات الإدخال لـ `Runnable` التالي. `Runnable.mapInput` و `Runnable.mapInputStream` و `Runnable.getItemFromMap` و `Runnable.getMapFromInput` هي أسهل طريقة للقيام بذلك بأقل قدر من التعليمات البرمجية المتكررة. ومع ذلك، قد تحتاج أحيانًا إلى مزيد من التحكم في قيم الإدخال والإخراج. هذا هو المكان الذي يأتي فيه `Runnable.fromFunction`.
 
-The main differences between `Runnable.mapInput` and `Runnable.fromFunction` are:
-- `Runnable.fromFunction` allows you to define separate logic for invoke vs stream.
-- `Runnabe.mapInput` allows you to access the invocation options.
+الاختلافات الرئيسية بين `Runnable.mapInput` و `Runnable.fromFunction` هي:
+- `Runnable.fromFunction` يسمح لك بتحديد منطق منفصل للاستدعاء (invoke) مقابل التدفق (stream).
+- `Runnable.mapInput` يسمح لك بالوصول إلى خيارات الاستدعاء.
 
 ## Runnable.fromFunction
 
-In the following example, we use `Runnable.fromFunction` to log the output value of the previous `Runnable`. Note that we have print different messages depending on whether the chain is invoked or streamed.
+في المثال التالي، نستخدم `Runnable.fromFunction` لتسجيل قيمة الإخراج لـ `Runnable` السابق. لاحظ أننا نطبع رسائل مختلفة اعتمادًا على ما إذا كانت السلسلة يتم استدعاؤها أو تدفقها.
 
 ```dart
 Runnable<T, RunnableOptions, T> logOutput<T extends Object>(String stepName) {
   return Runnable.fromFunction<T, T>(
     invoke: (input, options) {
-      print('Output from step "$stepName":\n$input\n---');
+      print("Output from step \"$stepName\":\n$input\n---");
       return Future.value(input);
     },
     stream: (inputStream, options) {
       return inputStream.map((input) {
-        print('Chunk from step "$stepName":\n$input\n---');
+        print("Chunk from step \"$stepName\":\n$input\n---");
         return input;
       });
     },
@@ -29,25 +29,25 @@ Runnable<T, RunnableOptions, T> logOutput<T extends Object>(String stepName) {
 final promptTemplate = ChatPromptTemplate.fromTemplates(const [
   (
     ChatMessageType.system,
-    'Write out the following equation using algebraic symbols then solve it. '
-        'Use the format:\nEQUATION:...\nSOLUTION:...\n',
+    "اكتب المعادلة التالية باستخدام الرموز الجبرية ثم حلها. "
+        "استخدم التنسيق:\nEQUATION:...\nSOLUTION:...\n",
   ),
-  (ChatMessageType.human, '{equation_statement}'),
+  (ChatMessageType.human, \'{equation_statement}\'),
 ]);
 
-final chain = Runnable.getMapFromInput<String>('equation_statement')
-    .pipe(logOutput('getMapFromInput'))
+final chain = Runnable.getMapFromInput<String>(\'equation_statement\')
+    .pipe(logOutput(\'getMapFromInput\'))
     .pipe(promptTemplate)
-    .pipe(logOutput('promptTemplate'))
+    .pipe(logOutput(\'promptTemplate\'))
     .pipe(ChatOpenAI(apiKey: openaiApiKey))
-    .pipe(logOutput('chatModel'))
+    .pipe(logOutput(\'chatModel\'))
     .pipe(const StringOutputParser())
-    .pipe(logOutput('outputParser'));
+    .pipe(logOutput(\'outputParser\'));
 ```
 
-When we invoke the chain, we get the following output:
+عندما نستدعي السلسلة، نحصل على الإخراج التالي:
 ```dart
-await chain.invoke('x raised to the third plus seven equals 12');
+await chain.invoke(\'x مرفوع للقوة الثالثة زائد سبعة يساوي 12\');
 // Output from step "getMapFromInput":
 // {equation_statement: x raised to the third plus seven equals 12}
 // ---
@@ -101,9 +101,9 @@ await chain.invoke('x raised to the third plus seven equals 12');
 // Therefore, the solution is \( x = \sqrt[3]{5} \)
 ```
 
-When we stream the chain, we get the following output:
+عندما نقوم بتدفق السلسلة، نحصل على الإخراج التالي:
 ```dart
-chain.stream('x raised to the third plus seven equals 12').listen((_){});
+chain.stream(\'x مرفوع للقوة الثالثة زائد سبعة يساوي 12\').listen((_){});
 // Chunk from step "getMapFromInput":
 // {equation_statement: x raised to the third plus seven equals 12}
 // ---

@@ -1,6 +1,6 @@
-# Tools
+# أدوات (Tools)
 
-Tools are also runnables, and can therefore be used within a chain:
+الأدوات قابلة للتنفيذ أيضاً، وبالتالي يمكن استخدامها ضمن سلسلة من العمليات:
 
 ```dart
 final openaiApiKey = Platform.environment['OPENAI_API_KEY'];

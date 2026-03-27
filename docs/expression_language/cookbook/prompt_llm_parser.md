@@ -1,35 +1,35 @@
-# Prompt + LLM
+# الموجه + النموذج اللغوي الكبير (LLM)
 
-The most common and valuable composition is taking:
+التكوين الأكثر شيوعًا وقيمة هو الجمع بين:
 
 ```
 PromptTemplate / ChatPromptTemplate -> LLM / ChatModel -> OutputParser
 ```
 
-Almost all other chains you build will use this building block.
+تقريبًا جميع السلاسل الأخرى التي ستبنيها ستستخدم هذه اللبنة الأساسية.
 
 ## PromptTemplate + LLM
 
-The simplest composition is just combing a prompt and model to create a chain that takes user input, adds it to a prompt, passes it to a model, and returns the raw model input.
+أبسط تكوين هو مجرد دمج موجه ونموذج لإنشاء سلسلة تأخذ مدخلات المستخدم، وتضيفها إلى موجه، وتمررها إلى نموذج، وتعيد المدخلات الخام للنموذج.
 
-Note, you can mix and match `PromptTemplate`/`ChatPromptTemplate` and `LLM`/`ChatModel` as you like here.
+ملاحظة: يمكنك مزج ومطابقة `PromptTemplate`/`ChatPromptTemplate` و `LLM`/`ChatModel` كما يحلو لك هنا.
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
-  'Tell me a joke about {foo}',
+  'أخبرني نكتة عن {foo}',
 );
 
 final chain = promptTemplate | model;
 
-final res = await chain.invoke({'foo': 'bears'});
+final res = await chain.invoke({'foo': 'الدببة'});
 print(res);
 // ChatResult{
 //   id: chatcmpl-9LBNiPXHzWIwc02rR6sS1HTcL9pOk,
 //   output: AIChatMessage{
-//     content: Why don't bears wear shoes?\nBecause they have bear feet!,
+//     content: لماذا لا ترتدي الدببة الأحذية؟\nلأن أقدامها عارية!,
 //   },
 //   finishReason: FinishReason.stop,
 //   metadata: {
@@ -46,31 +46,31 @@ print(res);
 // }
 ```
 
-Often times we want to attach options that'll be passed to each model call. You can do this in two ways:
+غالبًا ما نرغب في إرفاق خيارات سيتم تمريرها إلى كل استدعاء للنموذج. يمكنك القيام بذلك بطريقتين:
 
-1. Configuring the default options when instantiating the model. This will apply to all calls to the model.
-2. Configuring the options when using the model in a chain by using the `.bind` method. This will only apply to the calls in that chain.
+1.  تكوين الخيارات الافتراضية عند إنشاء النموذج. سيتم تطبيق هذا على جميع استدعاءات النموذج.
+2.  تكوين الخيارات عند استخدام النموذج في سلسلة باستخدام طريقة `.bind`. سيتم تطبيق هذا فقط على الاستدعاءات في تلك السلسلة.
 
-Let's look at some examples:
+دعنا نلقي نظرة على بعض الأمثلة:
 
-### Attaching Stop Sequences
+### إرفاق تسلسلات التوقف (Stop Sequences)
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
-  'Tell me a joke about {foo}',
+  'أخبرني نكتة عن {foo}',
 );
 
 final chain = promptTemplate | model.bind(ChatOpenAIOptions(stop: ['\n']));
 
-final res = await chain.invoke({'foo': 'bears'});
+final res = await chain.invoke({'foo': 'الدببة'});
 print(res);
 // ChatResult{
 //   id: chatcmpl-9LBOohTtdg12zD8zzz2GX1ib24UXO,
 //   output: AIChatMessage{
-//     content: Why don't bears wear shoes? ,
+//     content: لماذا لا ترتدي الدببة الأحذية؟ ,
 //   },
 //   finishReason: FinishReason.stop,
 //   metadata: {
@@ -87,29 +87,29 @@ print(res);
 // }
 ```
 
-### Attaching Tool Call information
+### إرفاق معلومات استدعاء الأداة (Tool Call information)
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
-  'Tell me a joke about {foo}',
+  'أخبرني نكتة عن {foo}',
 );
 
 const tool = ToolSpec(
   name: 'joke',
-  description: 'A joke',
+  description: 'نكتة',
   inputJsonSchema: {
     'type': 'object',
     'properties': {
       'setup': {
         'type': 'string',
-        'description': 'The setup for the joke',
+        'description': 'مقدمة النكتة',
       },
       'punchline': {
         'type': 'string',
-        'description': 'The punchline for the joke',
+        'description': 'خاتمة النكتة',
       },
     },
     'required': ['setup', 'punchline'],
@@ -124,7 +124,7 @@ final chain = promptTemplate |
       ),
     );
 
-final res = await chain.invoke({'foo': 'bears'});
+final res = await chain.invoke({'foo': 'الدببة'});
 print(res);
 // ChatResult{
 //   id: chatcmpl-9LBPyaZcFMgjmOvkD0JJKAyA4Cihb,
@@ -134,10 +134,10 @@ print(res);
 //       AIChatMessageToolCall{
 //         id: call_JIhyfu6jdIXaDHfYzbBwCKdb,
 //         name: joke,
-//         argumentsRaw: {"setup":"Why don't bears like fast food?","punchline":"Because they can't catch it!"},
+//         argumentsRaw: {"setup":"لماذا لا تحب الدببة الوجبات السريعة؟","punchline":"لأنها لا تستطيع الإمساك بها!"},
 //         arguments: {
-//           setup: Why don't bears like fast food?,
-//           punchline: Because they can't catch it!
+//           setup: لماذا لا تحب الدببة الوجبات السريعة؟,
+//           punchline: لأنها لا تستطيع الإمساك بها!
 //         },
 //       }
 //     ],
@@ -159,54 +159,54 @@ print(res);
 
 ## PromptTemplate + LLM + OutputParser
 
-We can also add in an output parser to conveniently transform the raw LLM/ChatModel output into a consistent format.
+يمكننا أيضًا إضافة محلل مخرجات (OutputParser) لتحويل مخرجات LLM/ChatModel الخام بسهولة إلى تنسيق متسق.
 
-### String Output Parser
+### محلل مخرجات السلسلة النصية (String Output Parser)
 
-If we just want the string output, we can use the `StringOutputParser`:
+إذا أردنا فقط المخرجات النصية، يمكننا استخدام `StringOutputParser`:
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
-  'Tell me a joke about {foo}',
+  'أخبرني نكتة عن {foo}',
 );
 
 final chain = promptTemplate | model | StringOutputParser();
 
-final res = await chain.invoke({'foo': 'bears'});
+final res = await chain.invoke({'foo': 'الدببة'});
 print(res);
-// Why don't bears wear shoes? Because they have bear feet!
+// لماذا لا ترتدي الدببة الأحذية؟ لأن أقدامها عارية!
 ```
 
-Notice that this now returns a string - a much more workable format for downstream tasks.
+لاحظ أن هذا يعيد الآن سلسلة نصية - وهو تنسيق أكثر قابلية للاستخدام للمهام اللاحقة.
 
-### Tools Output Parser
+### محلل مخرجات الأدوات (Tools Output Parser)
 
-When you specify a tool that the model should call, you may just want to parse the tool call directly.
+عند تحديد أداة يجب أن يستدعيها النموذج، قد ترغب فقط في تحليل استدعاء الأداة مباشرة.
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
-  'Tell me a joke about {foo}',
+  'أخبرني نكتة عن {foo}',
 );
 
 const tool = ToolSpec(
   name: 'joke',
-  description: 'A joke',
+  description: 'نكتة',
   inputJsonSchema: {
     'type': 'object',
     'properties': {
       'setup': {
         'type': 'string',
-        'description': 'The setup for the joke',
+        'description': 'مقدمة النكتة',
       },
       'punchline': {
         'type': 'string',
-        'description': 'The punchline for the joke',
+        'description': 'خاتمة النكتة',
       },
     },
     'required': ['setup', 'punchline'],
@@ -222,21 +222,21 @@ final chain = promptTemplate |
     ) |
     ToolsOutputParser();
 
-final res = await chain.invoke({'foo': 'bears'});
+final res = await chain.invoke({'foo': 'الدببة'});
 print(res);
 // [ParsedToolCall{
 //   id: call_tDYrlcVwk7bCi9oh5IuknwHu,
 //   name: joke,
 //   arguments: {
-//     setup: What do you call a bear with no teeth?, 
-//     punchline: A gummy bear!
+//     setup: ماذا تسمي الدب الذي لا يملك أسنان؟, 
+//     punchline: دب حلوى!
 //   },
 // }]
 ```
 
-## Simplifying input
+## تبسيط المدخلات (Simplifying input)
 
-To make invocation even simpler, we can add a `RunnableMap` to take care of creating the prompt input map with a `RunnablePassthrough` to get the input:
+لجعل الاستدعاء أبسط، يمكننا إضافة `RunnableMap` للعناية بإنشاء خريطة مدخلات الموجه باستخدام `RunnablePassthrough` للحصول على المدخلات:
 
 ```dart
 final map = Runnable.fromMap({
@@ -245,9 +245,9 @@ final map = Runnable.fromMap({
 final chain = map | promptTemplate | model | StringOutputParser();
 ```
 
-*`Runnable.passthrough()` is a convenience method that creates a `RunnablePassthrough` object. This is a `Runnable` that takes the input it receives and passes it through as output.*
+*`Runnable.passthrough()` هي طريقة مساعدة تنشئ كائن `RunnablePassthrough`. هذا هو `Runnable` الذي يأخذ المدخلات التي يتلقاها ويمررها كمخرجات.*
 
-However, this is a bit verbose. We can simplify it by using `Runnable.getMapFromInput` which does the same under the hood:
+ومع ذلك، هذا مطول بعض الشيء. يمكننا تبسيطه باستخدام `Runnable.getMapFromInput` الذي يقوم بنفس الشيء ضمنيًا:
 
 ```dart
 final chain = Runnable.getMapFromInput('foo') |
@@ -256,10 +256,10 @@ final chain = Runnable.getMapFromInput('foo') |
     StringOutputParser();
 ```
 
-Now, we can invoke the chain with just the input we care about:
+الآن، يمكننا استدعاء السلسلة بمدخلاتنا التي نهتم بها فقط:
 
 ```dart
-final res = await chain.invoke('bears');
+final res = await chain.invoke('الدببة');
 print(res);
-// Why don't bears wear shoes? Because they have bear feet!
+// لماذا لا ترتدي الدببة الأحذية؟ لأن أقدامها عارية!
 ```

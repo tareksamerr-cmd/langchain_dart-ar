@@ -1,57 +1,57 @@
-# Retrieval Augmented Generation (RAG)
+# توليد معزز بالاسترجاع (RAG)
 
-Let's look at adding in a retrieval step to a prompt and LLM, which adds up to a "retrieval-augmented generation" chain.
+دعنا نلقي نظرة على إضافة خطوة استرجاع إلى موجه ونموذج لغوي كبير (LLM)، والتي تشكل معًا "سلسلة توليد معزز بالاسترجاع".
 
-For this example, we are going to use Chroma vector store. First, we'll add some documents to the vector store:
+لهذا المثال، سنستخدم مخزن المتجهات Chroma. أولاً، سنضيف بعض المستندات إلى مخزن المتجهات:
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY']!;
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"]!;
 final embeddings = OpenAIEmbeddings(apiKey: openaiApiKey);
 
 final vectorStore = Chroma(embeddings: embeddings);
 await vectorStore.addDocuments(
   documents: const [
-    Document(pageContent: 'Payment methods: iDEAL, PayPal and credit card'),
-    Document(pageContent: 'Free shipping: on orders over 30€'),
+    Document(pageContent: 'طرق الدفع: iDEAL، باي بال، وبطاقة الائتمان'),
+    Document(pageContent: 'شحن مجاني: للطلبات التي تزيد عن 30 يورو'),
   ],
 );
 ```
 
-Now we can use the vector store as a retriever in a chain:
+الآن يمكننا استخدام مخزن المتجهات كأداة استرجاع في سلسلة:
 
 ```dart
 final retriever = vectorStore.asRetriever();
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final promptTemplate = ChatPromptTemplate.fromTemplate('''
-Answer the question based only on the following context:
+أجب عن السؤال بناءً على السياق التالي فقط:
 {context}
 
-Question: {question}''');
+السؤال: {question}''');
 
 final chain = Runnable.fromMap<String>({
   'context': retriever | Runnable.mapInput((docs) => docs.join('\n')),
   'question': Runnable.passthrough(),
 }) | promptTemplate | model | StringOutputParser();
 
-final res1 = await chain.invoke('What payment methods do you accept?');
+final res1 = await chain.invoke('ما هي طرق الدفع التي تقبلونها؟');
 print(res1);
-// The payment methods accepted are iDEAL, PayPal, and credit card.
+// طرق الدفع المقبولة هي iDEAL، باي بال، وبطاقة الائتمان.
 
-await chain.stream('How can I get free shipping?').forEach(stdout.write);
-// To get free shipping, you need to place an order over 30€.
+await chain.stream('كيف يمكنني الحصول على شحن مجاني؟').forEach(stdout.write);
+// للحصول على شحن مجاني، يجب أن يكون طلبك أكثر من 30 يورو.
 ```
 
-Imagine that we now want to answer the question in a different language. We will need to pass two parameters when invoking the chain. We can use 
+تخيل أننا نريد الآن الإجابة على السؤال بلغة مختلفة. سنحتاج إلى تمرير معلمتين عند استدعاء السلسلة. يمكننا استخدام:
 
 ```dart
 final promptTemplate = ChatPromptTemplate.fromTemplate('''
-Answer the question based only on the following context:
+أجب عن السؤال بناءً على السياق التالي فقط:
 {context}
 
-Question: {question}
+السؤال: {question}
 
-Answer in the following language: {language}''');
+أجب باللغة التالية: {language}''');
 
 final chain = Runnable.fromMap({
       'context': Runnable.getItemFromMap<String>('question') |
@@ -64,42 +64,42 @@ final chain = Runnable.fromMap({
     StringOutputParser();
 
 final res1 = await chain.invoke({
-  'question': 'What payment methods do you accept?',
+  'question': 'ما هي طرق الدفع التي تقبلونها؟',
   'language': 'es_ES',
 });
 print(res1);
 // Aceptamos los siguientes métodos de pago: iDEAL, PayPal y tarjeta de crédito.
 
 await chain.stream({
-  'question': 'How can I get free shipping?',
+  'question': 'كيف يمكنني الحصول على شحن مجاني؟',
   'language': 'nl_NL',
 }).forEach(stdout.write);
 // Om gratis verzending te krijgen, moet je bestellingen plaatsen van meer dan 30€.
 ```
 
-*Note: you may have noticed that we added parentheses around the retriever. This is to workaround the type inference limitations of Dart when using the `|` operator. You won't need them if you use `.pipe` instead.*
+*ملاحظة: ربما لاحظت أننا أضفنا أقواسًا حول أداة الاسترجاع. هذا للتحايل على قيود استنتاج النوع في Dart عند استخدام عامل التشغيل `|`. لن تحتاج إليها إذا استخدمت `.pipe` بدلاً من ذلك.*
 
-## Conversational Retrieval Chain
+## سلسلة الاسترجاع الحوارية
 
-Because we can create `Runnable`s from functions we can add in conversation history via a formatting function. This allows us to recreate the popular `ConversationalRetrievalQAChain` to "chat with data":
+نظرًا لأنه يمكننا إنشاء `Runnable`s من الدوال، يمكننا إضافة سجل المحادثة عبر دالة تنسيق. يتيح لنا هذا إعادة إنشاء `ConversationalRetrievalQAChain` الشهيرة لـ "الدردشة مع البيانات":
 
 ```dart
 final retriever = vectorStore.asRetriever();
 final model = ChatOpenAI(apiKey: openaiApiKey);
 
 final condenseQuestionPrompt = ChatPromptTemplate.fromTemplate('''
-Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+بناءً على المحادثة التالية وسؤال متابعة، أعد صياغة سؤال المتابعة ليكون سؤالًا مستقلاً، بلغته الأصلية.
 
-Chat History:
+سجل المحادثة:
 {chat_history}
-Follow Up Input: {question}
-Standalone question:''');
+مدخل المتابعة: {question}
+سؤال مستقل:''');
 
 final answerPrompt = ChatPromptTemplate.fromTemplate('''
-Answer the question based only on the following context:
+أجب عن السؤال بناءً على السياق التالي فقط:
 {context}
 
-Question: {question}''');
+السؤال: {question}''');
 
 String combineDocuments(
   final List<Document> documents, {
@@ -139,22 +139,22 @@ final conversationalQaChain =
     inputs | context | answerPrompt | model | StringOutputParser();
 
 final res1 = await conversationalQaChain.invoke({
-  'question': 'What payment methods do you accept?',
+  'question': 'ما هي طرق الدفع التي تقبلونها؟',
   'chat_history': <(String, String)>[],
 });
 print(res1);
-// The methods of payment that are currently accepted are iDEAL, PayPal, and credit card.
+// طرق الدفع المقبولة حاليًا هي iDEAL، باي بال، وبطاقة الائتمان.
 
 await conversationalQaChain.stream({
-  'question': 'Do I get free shipping?',
-  'chat_history': [('How much did you spend?', 'I spent 100€')],
+  'question': 'هل أحصل على شحن مجاني؟',
+  'chat_history': [('كم أنفقت؟', 'أنفقت 100 يورو')],
 }).forEach(stdout.write);
-// Yes, shipping is free on orders over 30€.
+// نعم، الشحن مجاني للطلبات التي تزيد عن 30 يورو.
 ```
 
-### With Memory and returning source documents
+### مع الذاكرة وإرجاع المستندات المصدرية
 
-In this example, we will add a memory to the chain and return the source documents from the retriever.
+في هذا المثال، سنضيف ذاكرة إلى السلسلة ونعيد المستندات المصدرية من أداة الاسترجاع.
 
 ```dart
 final retriever = vectorStore.asRetriever(
@@ -172,18 +172,18 @@ final memory = ConversationBufferMemory(
 );
 
 final condenseQuestionPrompt = ChatPromptTemplate.fromTemplate('''
-Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question that includes all the details from the conversation in its original language
+بناءً على المحادثة التالية وسؤال متابعة، أعد صياغة سؤال المتابعة ليكون سؤالًا مستقلاً يتضمن جميع التفاصيل من المحادثة بلغته الأصلية
 
-Chat History:
+سجل المحادثة:
 {chat_history}
-Follow Up Input: {question}
-Standalone question:''');
+مدخل المتابعة: {question}
+سؤال مستقل:''');
 
 final answerPrompt = ChatPromptTemplate.fromTemplate('''
-Answer the question based only on the following context:
+أجب عن السؤال بناءً على السياق التالي فقط:
 {context}
 
-Question: {question}''');
+السؤال: {question}''');
 
 String combineDocuments(
   final List<Document> documents, {
@@ -204,13 +204,13 @@ String formatChatHistory(final List<ChatMessage> chatHistory) {
   return formattedDialogueTurns.join('\n');
 }
 
-// First, we load the memory
+// أولاً، نقوم بتحميل الذاكرة
 final loadedMemory = Runnable.fromMap({
   'question': Runnable.getItemFromMap('question'),
   'memory': Runnable.mapInput((_) => memory.loadMemoryVariables()),
 });
 
-// Next, we get the chat history from the memory
+// بعد ذلك، نحصل على سجل المحادثة من الذاكرة
 final expandedMemory = Runnable.fromMap({
   'question': Runnable.getItemFromMap('question'),
   'chat_history': Runnable.getItemFromMap('memory') |
@@ -219,8 +219,7 @@ final expandedMemory = Runnable.fromMap({
       ),
 });
 
-// Now, we generate a standalone question that includes the 
-// necessary details from the chat history
+// الآن، نولد سؤالاً مستقلاً يتضمن التفاصيل الضرورية من سجل المحادثة
 final standaloneQuestion = Runnable.fromMap({
   'standalone_question': Runnable.fromMap({
         'question': Runnable.getItemFromMap('question'),
@@ -232,53 +231,51 @@ final standaloneQuestion = Runnable.fromMap({
       stringOutputParser,
 });
 
-// Now we retrieve the documents
+// الآن نسترجع المستندات
 final retrievedDocs = Runnable.fromMap({
   'docs': Runnable.getItemFromMap('standalone_question') | retriever,
   'question': Runnable.getItemFromMap('standalone_question'),
 });
 
-// Construct the inputs for the answer prompt
+// بناء المدخلات لموجه الإجابة
 final finalInputs = Runnable.fromMap({
   'context': Runnable.getItemFromMap('docs') |
       Runnable.mapInput<List<Document>, String>(combineDocuments),
   'question': Runnable.getItemFromMap('question'),
 });
 
-// We prompt the model for an answer
+// نوجه النموذج للحصول على إجابة
 final answer = Runnable.fromMap({
   'answer': finalInputs | answerPrompt | model | stringOutputParser,
   'docs': Runnable.getItemFromMap('docs'),
 });
 
-// And finally, we put it all together
+// وأخيرًا، نجمع كل ذلك معًا
 final conversationalQaChain = loadedMemory |
     expandedMemory |
     standaloneQuestion |
     retrievedDocs |
     answer;
 
-// If we add some messages to the memory, 
-// they will be used in the next invocation
+// إذا أضفنا بعض الرسائل إلى الذاكرة،
+// فسيتم استخدامها في الاستدعاء التالي
 await memory.saveContext(
   inputValues: {
-    'question': ChatMessage.humanText('How much does my order cost?')
+    'question': ChatMessage.humanText('كم تبلغ تكلفة طلبي؟')
   },
-  outputValues: {'answer': ChatMessage.ai('You have to pay 100€')},
+  outputValues: {'answer': ChatMessage.ai('عليك دفع 100 يورو')},
 );
 
 final res = await conversationalQaChain.invoke({
-  'question': 'Do I get free shipping on the value of my order?',
+  'question': 'هل أحصل على شحن مجاني بقيمة طلبي؟',
 });
 print(res);
 // {
-//   answer: Yes, based on the given context, you would receive free shipping on
-//     your order of 100€ since it exceeds the minimum requirement of 30€ for
-//     free shipping.,
+//   answer: نعم، بناءً على السياق المعطى، ستحصل على شحن مجاني لطلبك بقيمة 100 يورو لأنه يتجاوز الحد الأدنى المطلوب وهو 30 يورو للشحن المجاني.,
 //   docs: [
 //     Document{
 //       id: 69974fe1-8436-40c7-87d1-c59c5ff1c6a6,
-//       pageContent: Free shipping: on orders over 30€,
+//       pageContent: شحن مجاني: للطلبات التي تزيد عن 30 يورو,
 //       metadata: {},
 //     }
 //   ]

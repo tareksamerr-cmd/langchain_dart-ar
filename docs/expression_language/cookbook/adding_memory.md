@@ -1,6 +1,6 @@
-# Adding memory
 
-This shows how to add memory to an arbitrary chain. Right now, you can use the memory classes but need to hook them up manually.
+# إضافة ذاكرة (Adding memory)
+يوضح هذا كيفية إضافة ذاكرة إلى سلسلة عشوائية. حاليًا، يمكنك استخدام فئات الذاكرة ولكنك تحتاج إلى ربطها يدويًا.
 
 ```dart
 final openaiApiKey = Platform.environment['OPENAI_API_KEY'];

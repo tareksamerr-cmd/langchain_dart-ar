@@ -1,16 +1,16 @@
-# Fallbacks
+# البدائل (Fallbacks)
 
-When working with language models, you may often encounter issues from the underlying APIs, e.g. rate limits or downtime. Therefore, as you move your LLM applications into production it becomes more and more important to have contingencies for errors. That's why we've introduced the concept of fallbacks.
+عند العمل مع نماذج اللغة (language models)، قد تواجه غالبًا مشكلات من واجهات برمجة التطبيقات (APIs) الأساسية، مثل حدود المعدل (rate limits) أو فترات التوقف (downtime). لذلك، كلما نقلت تطبيقات نماذج اللغة الكبيرة (LLM applications) الخاصة بك إلى مرحلة الإنتاج، أصبح من المهم أكثر فأكثر أن تكون لديك خطط طوارئ للأخطاء. ولهذا السبب قدمنا مفهوم البدائل (fallbacks).
 
-Crucially, fallbacks can be applied not only on the LLM level but on the whole runnable level. This is important because often times different models require different prompts. So if your call to OpenAI fails, you don't just want to send the same prompt to Anthropic - you probably want to use e.g. a different prompt template.
+الأهم من ذلك، يمكن تطبيق البدائل ليس فقط على مستوى نموذج اللغة الكبير (LLM) ولكن على مستوى التشغيل بأكمله (runnable level). هذا مهم لأنه في كثير من الأحيان تتطلب النماذج المختلفة مطالبات (prompts) مختلفة. لذلك إذا فشلت مكالمتك إلى OpenAI، فأنت لا تريد فقط إرسال نفس المطالبة إلى Anthropic - فمن المحتمل أنك تريد استخدام قالب مطالبة (prompt template) مختلف على سبيل المثال.
 
-## Handling LLM API errors with fallbacks
+## معالجة أخطاء واجهة برمجة تطبيقات نموذج اللغة الكبير (LLM API) باستخدام البدائل
 
-This is maybe the most common use case for fallbacks. A request to an LLM API can fail for a variety of reasons - the API could be down, you could have hit a rate limit, or any number of things.  This Situation can be handled using Fallbacks.
+ربما يكون هذا هو الاستخدام الأكثر شيوعًا للبدائل. يمكن أن يفشل طلب إلى واجهة برمجة تطبيقات نموذج اللغة الكبير (LLM API) لمجموعة متنوعة من الأسباب - قد تكون واجهة برمجة التطبيقات (API) معطلة، أو قد تكون قد وصلت إلى حد المعدل (rate limit)، أو أي عدد من الأشياء. يمكن التعامل مع هذا الموقف باستخدام البدائل (Fallbacks).
 
-Fallbacks can be created using  `withFallbacks()` function on the runnable that you are working on, for example `final runnablWithFallbacks = mainRunnable.withFallbacks([fallback1, fallback2])` this would create a `RunnableWithFallback` along with a list of fallbacks. When it is invoked, the `mainRunnable` would be called first, if it fails then fallbacks would be invoked sequentially until one of the fallback in list return output. If the `mainRunnable` succeeds and returns output then the fallbacks won't be called. 
+يمكن إنشاء البدائل باستخدام دالة `withFallbacks()` على التشغيل (runnable) الذي تعمل عليه، على سبيل المثال `final runnablWithFallbacks = mainRunnable.withFallbacks([fallback1, fallback2])` سيؤدي هذا إلى إنشاء `RunnableWithFallback` جنبًا إلى جنب مع قائمة من البدائل. عند استدعائه، سيتم استدعاء `mainRunnable` أولاً، إذا فشل فسيتم استدعاء البدائل بالتسلسل حتى يعيد أحد البدائل في القائمة مخرجًا (output). إذا نجح `mainRunnable` وأعاد مخرجًا، فلن يتم استدعاء البدائل.
 
-## Fallback for chat models
+## البدائل لنماذج الدردشة (chat models)
 
 ```dart
 // fake model will throw error during invoke and fallback model will be called
@@ -59,9 +59,9 @@ print(res);
 */
 ```
 
-Note: if the options provided when invoking the runnable with fallbacks are not compatible with some of the fallbacks, they will be ignored. If you want to use different options for different fallbacks, provide them as `defaultOptions` when instantiating the fallbacks or use `bind()`. 
+ملاحظة: إذا كانت الخيارات المقدمة عند استدعاء التشغيل (runnable) مع البدائل (fallbacks) غير متوافقة مع بعض البدائل، فسيتم تجاهلها. إذا كنت ترغب في استخدام خيارات مختلفة للبدائل المختلفة، فقدمها كـ `defaultOptions` عند إنشاء البدائل أو استخدم `bind()`.
 
-## Fallbacks for RunnableSequences with batch
+## البدائل لتسلسلات التشغيل (RunnableSequences) مع الدُفعات (batch)
 
 ```dart
 final fakeOpenAIModel = ChatOpenAI(

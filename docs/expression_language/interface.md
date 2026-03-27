@@ -1,32 +1,32 @@
-# Runnable interface
+# واجهة Runnable (Runnable interface)
 
-To make it as easy as possible to create custom chains, LangChain provides a `Runnable` interface that most components implement, including chat models, LLMs, output parsers, retrievers, prompt templates, and more.
+لتسهيل إنشاء سلاسل مخصصة قدر الإمكان، توفر LangChain واجهة `Runnable` التي تنفذها معظم المكونات، بما في ذلك نماذج الدردشة (chat models)، ونماذج اللغة الكبيرة (LLMs)، ومحللات المخرجات (output parsers)، والمسترجعات (retrievers)، وقوالب المطالبات (prompt templates)، والمزيد.
 
-This is a standard interface, which makes it easy to define custom chains as well as invoke them in a standard way. The standard interface includes:
+هذه واجهة قياسية، مما يسهل تحديد السلاسل المخصصة بالإضافة إلى استدعائها بطريقة قياسية. تتضمن الواجهة القياسية ما يلي:
 
-- `invoke`: call the chain on an input and return the output.
-- `stream`: call the chain on an input and stream the output.
-- `batch`: call the chain on a list of inputs and return a list of outputs.
+- `invoke`: استدعاء السلسلة على إدخال وإرجاع المخرجات.
+- `stream`: استدعاء السلسلة على إدخال وبث المخرجات.
+- `batch`: استدعاء السلسلة على قائمة من المدخلات وإرجاع قائمة من المخرجات.
 
-The type of the input and output varies by component:
+يختلف نوع الإدخال والإخراج حسب المكون:
 
-| Component                   | Input Type             | Output Type            |
+| المكون                      | نوع الإدخال             | نوع الإخراج            |
 |-----------------------------|------------------------|------------------------|
 | `PromptTemplate`            | `Map<String, dynamic>` | `PromptValue`          |
 | `ChatMessagePromptTemplate` | `Map<String, dynamic>` | `PromptValue`          |
 | `LLM`                       | `PromptValue`          | `LLMResult`            |
 | `ChatModel`                 | `PromptValue`          | `ChatResult`           |
-| `OutputParser`              | Any object             | Parser output type     |
+| `OutputParser`              | أي كائن                | نوع مخرجات المحلل      |
 | `Retriever`                 | `String`               | `List<Document>`       |
 | `DocumentTransformer`       | `List<Document>`       | `List<Document>`       |
 | `Tool`                      | `Map<String, dynamic>` | `String`               |
 | `Chain`                     | `Map<String, dynamic>` | `Map<String, dynamic>` |
 
-There are also several useful primitives for working with runnables, which you can read about in [this section](/expression_language/primitives.md).
+هناك أيضًا العديد من البدائيات المفيدة للعمل مع `runnables`، والتي يمكنك قراءتها في [هذا القسم](/expression_language/primitives.md).
 
-## Runnable interface
+## واجهة Runnable (Runnable interface)
 
-Let's take a look at these methods! To do so, we'll create a super simple `PromptTemplate` + `ChatModel` chain.
+دعنا نلقي نظرة على هذه الطرق! للقيام بذلك، سنقوم بإنشاء سلسلة `PromptTemplate` + `ChatModel` بسيطة للغاية.
 
 ```dart
 final model = ChatOpenAI(apiKey: openaiApiKey);
@@ -38,11 +38,11 @@ final promptTemplate = ChatPromptTemplate.fromTemplate(
 final chain = promptTemplate.pipe(model).pipe(StringOutputParser());
 ```
 
-In this example, we use the method `pipe` to combine runnables into a sequence. You can read more about this in the [RunnableSequence: Chaining runnables](/expression_language/primitives/sequence.md) section.
+في هذا المثال، نستخدم طريقة `pipe` لدمج `runnables` في تسلسل. يمكنك قراءة المزيد عن هذا في قسم [RunnableSequence: Chaining runnables](/expression_language/primitives/sequence.md).
 
 ### Invoke
 
-The `invoke` method takes an input and returns the output of invoking the chain on that input.
+تأخذ طريقة `invoke` إدخالًا وتعيد مخرجات استدعاء السلسلة على هذا الإدخال.
 
 ```dart
 final res = await chain.invoke({'topic': 'bears'});
@@ -52,7 +52,7 @@ print(res);
 
 ### Stream
 
-The `stream` method takes an input and streams back chunks of the output.
+تأخذ طريقة `stream` إدخالًا وتبث أجزاء من المخرجات.
 
 ```dart
 final stream = chain.stream({'topic': 'bears'});
@@ -81,7 +81,7 @@ await for (final res in stream) {
 
 ### Batch
 
-Batches the invocation of the `Runnable` on the given `inputs`.
+تقوم بتجميع استدعاء `Runnable` على `inputs` المعطاة.
 
 ```dart
 final res = await chain.batch([
@@ -93,12 +93,12 @@ print(res);
 // 'Why was the cat sitting on the computer? Because it wanted to keep an eye on the mouse!']
 ```
 
-If the underlying provider supports batching, this method will try to batch the calls to the provider. Otherwise, it will just call `invoke` on each input concurrently. You can configure the concurrency limit by setting the `concurrencyLimit` field in the `options` parameter.
+إذا كان المزود الأساسي يدعم التجميع (batching)، فستحاول هذه الطريقة تجميع الاستدعاءات إلى المزود. وإلا، فستقوم فقط باستدعاء `invoke` على كل إدخال بشكل متزامن. يمكنك تكوين حد التزامن عن طريق تعيين حقل `concurrencyLimit` في معلمة `options`.
 
-You can provide call options to the `batch` method using the `options` parameter. It can be:
-- `null`: the default options are used.
-- List with 1 element: the same options are used for all inputs.
-- List with the same length as the inputs: each input gets its own options.
+يمكنك توفير خيارات الاستدعاء لطريقة `batch` باستخدام معلمة `options`. يمكن أن تكون:
+- `null`: يتم استخدام الخيارات الافتراضية.
+- قائمة بعنصر واحد: يتم استخدام نفس الخيارات لجميع المدخلات.
+- قائمة بنفس طول المدخلات: يحصل كل إدخال على خياراته الخاصة.
 
 ```dart
 final res = await chain.batch(
@@ -112,6 +112,6 @@ final res = await chain.batch(
   ],
 );
 print(res);
-//['Why did the bear break up with his girlfriend? Because he couldn't bear the relationship anymore!,',
+//['Why did the bear break up with his girlfriend? Because he couldn't bear the relationship anymore!',
 // 'Why don't cats play poker in the jungle? Because there's too many cheetahs!']
 ```

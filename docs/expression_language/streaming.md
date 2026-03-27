@@ -1,44 +1,44 @@
-# Streaming With LangChain
+# البث (Streaming) باستخدام LangChain
 
-Streaming is critical in making applications based on LLMs feel responsive to end-users.
+يعد البث أمرًا بالغ الأهمية لجعل التطبيقات المستندة إلى نماذج اللغة الكبيرة (LLMs) تبدو سريعة الاستجابة للمستخدمين النهائيين.
 
-Important LangChain primitives like LLMs, parsers, prompts, retrievers, and agents implement the LangChain [Runnable Interface](/expression_language/interface.md).
+تطبق بدائيات LangChain المهمة مثل نماذج اللغة الكبيرة (LLMs)، والمحللات (parsers)، والمطالبات (prompts)، والمسترجعات (retrievers)، والوكلاء (agents) واجهة LangChain [Runnable Interface](/expression_language/interface.md).
 
-This guide will show you how to use `.stream()` to stream the final output of the chain.
+سيوضح لك هذا الدليل كيفية استخدام `.stream()` لبث المخرجات النهائية للسلسلة.
 
-## Using Stream
+## استخدام البث (Stream)
 
-All `Runnable` objects implement a method called `stream`.
+تنفذ جميع كائنات `Runnable` طريقة تسمى `stream`.
 
-These methods are designed to stream the final output in chunks, yielding each chunk as soon as it is available.
+تم تصميم هذه الطرق لبث المخرجات النهائية في أجزاء (chunks)، وتقديم كل جزء بمجرد توفره.
 
-Streaming is only possible if all steps in the program know how to process an **input stream**; i.e., process an input chunk one at a time, and yield a corresponding output chunk.
+البث ممكن فقط إذا كانت جميع الخطوات في البرنامج تعرف كيفية معالجة **تدفق الإدخال (input stream)**؛ أي معالجة جزء إدخال واحدًا تلو الآخر، وتقديم جزء إخراج مطابق.
 
-The complexity of this processing can vary, from straightforward tasks like emitting tokens produced by an LLM, to more challenging ones like streaming parts of JSON results before the entire JSON is complete.
+يمكن أن يختلف تعقيد هذه المعالجة، من المهام المباشرة مثل إصدار الرموز (tokens) التي تنتجها نماذج اللغة الكبيرة (LLM)، إلى المهام الأكثر تحديًا مثل بث أجزاء من نتائج JSON قبل اكتمال JSON بأكمله.
 
-The best place to start exploring streaming is with the single most important components in LLM apps – the models themselves!
+أفضل مكان للبدء في استكشاف البث هو مع أهم المكونات في تطبيقات نماذج اللغة الكبيرة (LLM apps) - النماذج نفسها!
 
-## LLMs and Chat Models
+## نماذج اللغة الكبيرة (LLMs) ونماذج الدردشة (Chat Models)
 
-Large language models and their chat variants are the primary bottleneck in LLM based apps.
+تعد نماذج اللغة الكبيرة ومتغيرات الدردشة الخاصة بها هي عنق الزجاجة الأساسي في التطبيقات المستندة إلى نماذج اللغة الكبيرة (LLM).
 
-Large language models can take **several seconds** to generate a complete response to a query. This is far slower than the **~200-300 ms** threshold at which an application feels responsive to an end user.
+يمكن أن تستغرق نماذج اللغة الكبيرة **عدة ثوانٍ** لإنشاء استجابة كاملة لاستعلام. هذا أبطأ بكثير من عتبة **~200-300 مللي ثانية** التي يشعر عندها التطبيق بالاستجابة للمستخدم النهائي.
 
-The key strategy to make the application feel more responsive is to show intermediate progress; e.g., to stream the output from the model token by token.
+الاستراتيجية الرئيسية لجعل التطبيق يبدو أكثر استجابة هي إظهار التقدم الوسيط؛ على سبيل المثال، لبث المخرجات من النموذج رمزًا تلو الآخر.
 
 ```dart
 final model = ChatOpenAI(apiKey: openAiApiKey);
 
-final stream = model.stream(PromptValue.string('Hello! Tell me about yourself.'));
+final stream = model.stream(PromptValue.string("Hello! Tell me about yourself."));
 final chunks = <ChatResult>[];
 await for (final chunk in stream) {
   chunks.add(chunk);
-  stdout.write('${chunk.output.content}|');
+  stdout.write("${chunk.output.content}|");
 }
 // Hello|!| I| am| a| language| model| AI| created| by| Open|AI|,|...
 ```
 
-Let’s have a look at one of the raw chunks:
+دعنا نلقي نظرة على أحد الأجزاء الخام (raw chunks):
 
 ```dart
 print(chunks.first);
@@ -57,9 +57,9 @@ print(chunks.first);
 // }
 ```
 
-We got back a `ChatResult` instance as usual, but containing only a part of the full response (`Hello`). 
+لقد حصلنا على مثيل `ChatResult` كالمعتاد، ولكنه يحتوي فقط على جزء من الاستجابة الكاملة (`Hello`).
 
-We can identify results that are streamed by checking the `streaming` field. The result objects are additive by design – one can simply add them up using the `.concat()` method to get the state of the response so far!
+يمكننا تحديد النتائج التي يتم بثها عن طريق التحقق من حقل `streaming`. كائنات النتائج إضافية بطبيعتها - يمكن للمرء ببساطة إضافتها باستخدام طريقة `.concat()` للحصول على حالة الاستجابة حتى الآن!
 
 ```dart
 final result = chunks.sublist(0, 6).reduce((prev, next) => prev.concat(next));
@@ -79,46 +79,47 @@ print(result);
 // }
 ```
 
-## Chains
+## السلاسل (Chains)
 
-Virtually all LLM applications involve more steps than just a call to a language model.
+تتضمن جميع تطبيقات نماذج اللغة الكبيرة (LLM) تقريبًا خطوات أكثر من مجرد استدعاء لنموذج لغة.
 
-Let’s build a simple chain using LangChain Expression Language (LCEL) that combines a prompt, model and a parser and verify that streaming works.
+دعنا نبني سلسلة بسيطة باستخدام لغة تعبير LangChain (LCEL) تجمع بين مطالبة (prompt)، ونموذج (model)، ومحلل (parser) ونتحقق من أن البث يعمل.
 
-We will use `StringOutputParser` to parse the output from the model. This is a simple parser that extracts the string output from the result returned by the model.
+سنستخدم `StringOutputParser` لتحليل المخرجات من النموذج. هذا محلل بسيط يستخرج المخرجات النصية من النتيجة التي يعيدها النموذج.
 
-> LCEL is a declarative way to specify a “program” by chaining together different LangChain primitives. Chains created using LCEL benefit from an automatic implementation of stream, allowing streaming of the final output. In fact, chains created with LCEL implement the entire standard Runnable interface. 
+> LCEL هي طريقة تصريحية لتحديد 
+برنامج (program) عن طريق ربط بدائيات LangChain المختلفة معًا. تستفيد السلاسل التي تم إنشاؤها باستخدام LCEL من تطبيق تلقائي للبث (stream)، مما يسمح ببث المخرجات النهائية. في الواقع، السلاسل التي تم إنشاؤها باستخدام LCEL تنفذ واجهة Runnable القياسية بأكملها.
 
 ```dart
 final model = ChatOpenAI(apiKey: openAiApiKey);
-final prompt = ChatPromptTemplate.fromTemplate('Tell me a joke about {topic}');
+final prompt = ChatPromptTemplate.fromTemplate("Tell me a joke about {topic}");
 const parser = StringOutputParser<ChatResult>();
 
 final chain = prompt.pipe(model).pipe(parser);
 
-final stream = chain.stream({'topic': 'parrot'});
-await stream.forEach((final chunk) => stdout.write('$chunk|'));
+final stream = chain.stream({"topic": "parrot"});
+await stream.forEach((final chunk) => stdout.write("$chunk|"));
 // |Why| don|'t| you| ever| play| hide| and| seek| with| a| par|rot|?|
 // |Because| they| always| squ|awk| when| they| find| you|!||
 ```
 
-You might notice above that parser actually doesn't block the streaming output from the model, and instead processes each chunk individually. Many of the LCEL primitives also support this kind of transform-style passthrough streaming, which can be very convenient when constructing apps.
+قد تلاحظ أعلاه أن المحلل (parser) لا يمنع مخرجات البث من النموذج، وبدلاً من ذلك يعالج كل جزء على حدة. تدعم العديد من بدائيات LCEL أيضًا هذا النوع من البث التحويلي (transform-style passthrough streaming)، والذي يمكن أن يكون مناسبًا جدًا عند بناء التطبيقات.
 
-> You do not have to use the LangChain Expression Language to use LangChain and can instead rely on a standard imperative programming approach by calling invoke, batch or stream on each component individually, assigning the results to variables and then using them downstream as you see fit.  
+> ليس عليك استخدام لغة تعبير LangChain لاستخدام LangChain ويمكنك بدلاً من ذلك الاعتماد على نهج برمجة إلزامي قياسي عن طريق استدعاء `invoke` أو `batch` أو `stream` على كل مكون على حدة، وتعيين النتائج للمتغيرات ثم استخدامها في المراحل اللاحقة كما تراه مناسبًا.
 > 
-> If that works for your needs, then that’s fine by us 👌!
+> إذا كان ذلك يلبي احتياجاتك، فلا بأس بذلك 👌!
 
-## Working with Input Streams
+## العمل مع تدفقات الإدخال (Input Streams)
 
-What if you wanted to stream JSON from the output as it was being generated?
+ماذا لو أردت بث JSON من المخرجات أثناء إنشائها؟
 
-If you were to rely on `json.decode` to parse the partial json, the parsing would fail as the partial json wouldn't be valid json.
+إذا كنت ستعتمد على `json.decode` لتحليل JSON الجزئي، فسيفشل التحليل لأن JSON الجزئي لن يكون JSON صالحًا.
 
-You'd likely be at a complete loss of what to do and claim that it wasn't possible to stream JSON.
+من المحتمل أن تكون في حيرة تامة بشأن ما يجب فعله وتدعي أنه من المستحيل بث JSON.
 
-Well, turns out there is a way to do it - the parser needs to operate on the input stream, and attempt to “auto-complete” the partial json into a valid state.
+حسنًا، اتضح أن هناك طريقة للقيام بذلك - يحتاج المحلل (parser) إلى العمل على تدفق الإدخال (input stream)، ومحاولة "إكمال تلقائي" لـ JSON الجزئي إلى حالة صالحة.
 
-Let’s see such a parser in action to understand what this means.
+دعنا نرى مثل هذا المحلل في العمل لفهم ما يعنيه هذا.
 
 ```dart
 final model = ChatOpenAI(
@@ -133,13 +134,13 @@ final chain = model.pipe(parser);
 
 final stream = chain.stream(
   PromptValue.string(
-    'Output a list of the countries france, spain and japan and their '
-    'populations in JSON format. Use a dict with an outer key of '
-    '"countries" which contains a list of countries. '
-    'Each country should have the key "name" and "population"',
+    "Output a list of the countries france, spain and japan and their "
+    "populations in JSON format. Use a dict with an outer key of "
+    "\"countries\" which contains a list of countries. "
+    "Each country should have the key \"name\" and \"population\"",
   ),
 );
-await stream.forEach((final chunk) => print('$chunk|'));
+await stream.forEach((final chunk) => print("$chunk|"));
 // {}|
 // {countries: []}|
 // {countries: [{}]}|
@@ -149,31 +150,29 @@ await stream.forEach((final chunk) => print('$chunk|'));
 // {countries: [{name: France, population: 670760}]}|
 // {countries: [{name: France, population: 67076000}]}|
 // {countries: [{name: France, population: 67076000}, {}]}|
-// {countries: [{name: France, population: 67076000}, {name: }]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 467}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 467237}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {}]}|
-// {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {name: }]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {name: Japan}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {name: Japan, population: 126}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {name: Japan, population: 126476}]}|
 // {countries: [{name: France, population: 67076000}, {name: Spain, population: 46723749}, {name: Japan, population: 126476461}]}|
 ```
 
-### Transforming Streams
+### تحويل التدفقات (Transforming Streams)
 
-Now, instead of returning the complete JSON object, we want to extract the country names from the JSON as they are being generated. We can use `Runnable.mapInputStream` to transform the stream.
+الآن، بدلاً من إرجاع كائن JSON الكامل، نريد استخراج أسماء الدول من JSON أثناء إنشائها. يمكننا استخدام `Runnable.mapInputStream` لتحويل التدفق.
 
 ```dart
 final mapper = Runnable.mapInputStream((Stream<Map<String, dynamic>> inputStream) {
   return inputStream.map((input) {
-    final countries = (input['countries'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final countries = (input["countries"] as List?)?.cast<Map<String, dynamic>>() ?? [];
     final countryNames = countries
-        .map((country) => country['name'] as String?)
+        .map((country) => country["name"] as String?)
         .where((c) => c != null && c.isNotEmpty);
-    return countryNames.join(', ');
+    return countryNames.join(", ");
   }).distinct();
 });
 
@@ -181,10 +180,10 @@ final chain = model.pipe(parser).pipe(mapper);
 
 final stream = chain.stream(
   PromptValue.string(
-    'Output a list of the countries france, spain and japan and their '
-    'populations in JSON format. Use a dict with an outer key of '
-    '"countries" which contains a list of countries. '
-    'Each country should have the key "name" and "population"',
+    "Output a list of the countries france, spain and japan and their "
+    "populations in JSON format. Use a dict with an outer key of "
+    "\"countries\" which contains a list of countries. "
+    "Each country should have the key \"name\" and \"population\"",
   ),
 );
 await stream.forEach(print);
@@ -193,9 +192,9 @@ await stream.forEach(print);
 // France, Spain, Japan
 ```
 
-## Non-streaming components
+## المكونات غير المتدفقة (Non-streaming components)
 
-The following runnables cannot process individual input chunks and instead aggregate the streaming input from the previous step into a single value before processing it:
+لا يمكن للمكونات القابلة للتشغيل (runnables) التالية معالجة أجزاء الإدخال الفردية وبدلاً من ذلك تقوم بتجميع إدخال البث من الخطوة السابقة في قيمة واحدة قبل معالجتها:
 - `PromptTemplate`
 - `ChatPromptTemplate`
 - `LLM`
@@ -205,53 +204,53 @@ The following runnables cannot process individual input chunks and instead aggre
 - `RunnableFunction`
 - `RunnableRouter`
 
-Let see what happens when we try to stream them. 🤨
+دعنا نرى ما يحدث عندما نحاول بثها. 🤨
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 
 final vectorStore = MemoryVectorStore(
   embeddings: OpenAIEmbeddings(apiKey: openaiApiKey),
 );
 await vectorStore.addDocuments(
   documents: const [
-    Document(pageContent: 'LangChain was created by Harrison'),
+    Document(pageContent: "LangChain was created by Harrison"),
     Document(
-      pageContent: 'David ported LangChain to Dart in LangChain.dart',
+      pageContent: "David ported LangChain to Dart in LangChain.dart",
     ),
   ],
 );
 final retriever = vectorStore.asRetriever();
 
-await retriever.stream('Who created LangChain.dart?').forEach(print);
+await retriever.stream("Who created LangChain.dart?").forEach(print);
 // [Document{pageContent: David ported LangChain to Dart in LangChain.dart}, 
 // Document{pageContent: LangChain was created by Harrison}]
 ```
 
-Stream just yielded the final result from that component.
+لقد أظهر البث (Stream) للتو النتيجة النهائية من هذا المكون.
 
-This is OK 🥹! Not all components have to implement streaming – in some cases streaming is either unnecessary, difficult or just doesn’t make sense.
+هذا جيد 🥹! ليس من الضروري أن تنفذ جميع المكونات البث - ففي بعض الحالات يكون البث غير ضروري أو صعب أو لا معنى له ببساطة.
 
-An LCEL chain constructed using non-streaming components, will still be able to stream in a lot of cases, with streaming of partial output starting after the last non-streaming step in the chain.
+ستظل سلسلة LCEL التي تم إنشاؤها باستخدام مكونات غير متدفقة قادرة على البث في كثير من الحالات، مع بدء بث المخرجات الجزئية بعد آخر خطوة غير متدفقة في السلسلة.
 
 ```dart
 final promptTemplate = ChatPromptTemplate.fromTemplates(const [
   (
     ChatMessageType.system,
-    'Answer the question based on only the following context:\n{context}',
+    "Answer the question based on only the following context:\n{context}",
   ),
-  (ChatMessageType.human, '{question}'),
+  (ChatMessageType.human, "{question}"),
 ]);
 final model = ChatOpenAI(apiKey: openaiApiKey);
 const outputParser = StringOutputParser<ChatResult>();
 
 final retrievalChain = Runnable.fromMap<String>({
-  'context': retriever,
-  'question': Runnable.passthrough(),
+  "context": retriever,
+  "question": Runnable.passthrough(),
 }).pipe(promptTemplate).pipe(model).pipe(outputParser);
 
 await retrievalChain
-    .stream('Who created LangChain.dart?')
-    .forEach((chunk) => stdout.write('$chunk|'));
+    .stream("Who created LangChain.dart?")
+    .forEach((chunk) => stdout.write("$chunk|"));
 // |David| created| Lang|Chain|.dart|.||
 ```

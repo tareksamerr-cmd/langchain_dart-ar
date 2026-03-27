@@ -1,8 +1,8 @@
-# Primitives
+# البدائيون (Primitives)
 
-In addition to various components that are usable with LCEL, LangChain also includes various primitives that help pass around and format data, bind arguments, invoke custom logic, and more.
+بالإضافة إلى المكونات المختلفة القابلة للاستخدام مع LCEL، يتضمن LangChain أيضًا العديد من العناصر الأساسية التي تساعد في تمرير البيانات وتنسيقها، وربط الوسائط، واستدعاء منطق مخصص، والمزيد.
 
-This section goes into greater depth on where and how some of these components are useful.
+يتناول هذا القسم بمزيد من التفصيل أماكن وكيفية استخدام بعض هذه المكونات.
 
 - [Sequence: Chaining runnables](/expression_language/primitives/sequence.md)
 - [Map: Formatting inputs & concurrency](/expression_language/primitives/map.md)

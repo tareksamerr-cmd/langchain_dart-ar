@@ -1,13 +1,13 @@
-# Get started
+# البدء (Get started)
 
-LCEL makes it easy to build complex chains from basic components, and supports out of the box functionality such as streaming, parallelism, and logging.
+تسهل LCEL بناء سلاسل معقدة من المكونات الأساسية، وتدعم وظائف جاهزة مثل البث (streaming)، والتوازي (parallelism)، والتسجيل (logging).
 
-# Basic example: prompt + model + output parser
+# مثال أساسي: مطالبة (prompt) + نموذج (model) + محلل مخرجات (output parser)
 
-The most basic and common use case is chaining a prompt template and a model together. To see how this works, let’s create a chain that takes a topic and generates a joke:
+الحالة الأكثر أساسية وشيوعًا هي ربط قالب مطالبة (prompt template) ونموذج (model) معًا. لمعرفة كيفية عمل ذلك، دعنا ننشئ سلسلة تأخذ موضوعًا وتولد نكتة:
 
 ```dart
-final openaiApiKey = Platform.environment['OPENAI_API_KEY'];
+final openaiApiKey = Platform.environment["OPENAI_API_KEY"];
 
 final promptTemplate = ChatPromptTemplate.fromTemplate(
   'Tell me a joke about {topic}',
@@ -23,19 +23,19 @@ print(res);
 // Because it had too many "scoops"!
 ```
 
-Notice this line of this code, where we piece together then different components into a single chain using LCEL:
+لاحظ هذا السطر من هذا الكود، حيث نجمع المكونات المختلفة في سلسلة واحدة باستخدام LCEL:
 
 ```dart
 final chain = promptTemplate.pipe(model).pipe(outputParser);
 ```
 
-The `.pipe()` method (or `|` operator) is similar to a unix pipe operator, which chains together the different components feeds the output from one component as input into the next component.
+تتشابه طريقة `.pipe()` (أو عامل التشغيل `|`) مع عامل تشغيل الأنابيب (unix pipe operator)، الذي يربط المكونات المختلفة معًا ويغذي المخرجات من مكون واحد كمدخل للمكون التالي.
 
-In this chain the user input is passed to the prompt template, then the prompt template output is passed to the model, then the model output is passed to the output parser. Let’s take a look at each component individually to really understand what’s going on.
+في هذه السلسلة، يتم تمرير إدخال المستخدم إلى قالب المطالبة (prompt template)، ثم يتم تمرير مخرجات قالب المطالبة إلى النموذج (model)، ثم يتم تمرير مخرجات النموذج إلى محلل المخرجات (output parser). دعنا نلقي نظرة على كل مكون على حدة لفهم ما يحدث حقًا.
 
-## 1. Prompt
+## 1. المطالبة (Prompt)
 
-`promptTemplate` is a `BasePromptTemplate`, which means it takes in a map of template variables and produces a `PromptValue`. A `PromptValue` is a wrapper around a completed prompt that can be passed to either an `LLM` (which takes a string as input) or `ChatModel` (which takes a sequence of messages as input). It can work with either language model type because it defines logic both for producing `ChatMessage` and for producing a string.
+`promptTemplate` هو `BasePromptTemplate`، مما يعني أنه يأخذ خريطة من متغيرات القالب (template variables) وينتج `PromptValue`. `PromptValue` هو غلاف حول مطالبة مكتملة يمكن تمريرها إما إلى `LLM` (الذي يأخذ سلسلة كمدخل) أو `ChatModel` (الذي يأخذ تسلسلًا من الرسائل كمدخل). يمكن أن يعمل مع أي نوع من نماذج اللغة لأنه يحدد منطقًا لإنتاج `ChatMessage` ولإنتاج سلسلة.
 
 ```dart
 final promptValue = await promptTemplate.invoke({'topic': 'ice cream'});
@@ -53,9 +53,9 @@ print(string);
 // Human: Tell me a joke about ice cream
 ```
 
-## 2. Model
+## 2. النموذج (Model)
 
-The `PromptValue` is then passed to `model`. In this case our `model` is a `ChatModel`, meaning it will output a `ChatMessage`.
+يتم بعد ذلك تمرير `PromptValue` إلى `model`. في هذه الحالة، `model` الخاص بنا هو `ChatModel`، مما يعني أنه سيخرج `ChatMessage`.
 
 ```dart
 final chatOutput = await model.invoke(promptValue);
@@ -66,7 +66,7 @@ print(chatOutput.output);
 // }
 ```
 
-If our model was an `LLM`, it would output a `String`.
+إذا كان نموذجنا `LLM`، فسيخرج `String`.
 
 ```dart
 final llm = OpenAI(apiKey: openaiApiKey);
@@ -76,9 +76,9 @@ print(llmOutput.output);
 // Because it had a rocky road!
 ```
 
-## 3. Output parser
+## 3. محلل المخرجات (Output parser)
 
-And lastly we pass our `model` output to the `outputParser`, which is a `BaseOutputParser` meaning it takes either a `String` or a `ChatMessage` as input. The `StringOutputParser` specifically simple converts any input into a `String`.
+وأخيرًا، نمرر مخرجات `model` الخاصة بنا إلى `outputParser`، وهو `BaseOutputParser` مما يعني أنه يأخذ إما `String` أو `ChatMessage` كمدخل. يقوم `StringOutputParser` على وجه التحديد بتحويل أي إدخال إلى `String`.
 
 ```dart
 final parsed = await outputParser.invoke(chatOutput);
@@ -87,18 +87,18 @@ print(parsed);
 // Because it had a rocky road!
 ```
 
-## 4. Entire Pipeline
+## 4. المسار الكامل (Entire Pipeline)
 
-To follow the steps along:
+لمتابعة الخطوات:
 
-1. We pass in user input on the desired topic as `{'topic': 'ice cream'}`
-2. The `promptTemplate` component takes the user input, which is then used to construct a `PromptValue` after using the `topic` to construct the prompt.
-3. The `model` component takes the generated prompt, and passes into the OpenAI chat model for evaluation. The generated output from the model is a `ChatMessage` object (specifically an `AIChatMessage`).
-4. Finally, the `outputParser` component takes in a `ChatMessage`, and transforms this into a `String`, which is returned from the invoke method.
+1. نمرر إدخال المستخدم حول الموضوع المطلوب كـ `{'topic': 'ice cream'}`.
+2. يأخذ مكون `promptTemplate` إدخال المستخدم، والذي يستخدم بعد ذلك لإنشاء `PromptValue` بعد استخدام `topic` لإنشاء المطالبة.
+3. يأخذ مكون `model` المطالبة التي تم إنشاؤها، ويمررها إلى نموذج دردشة OpenAI للتقييم. المخرجات التي تم إنشاؤها من النموذج هي كائن `ChatMessage` (تحديدًا `AIChatMessage`).
+4. أخيرًا، يأخذ مكون `outputParser` `ChatMessage`، ويحولها إلى `String`، والتي يتم إرجاعها من طريقة `invoke`.
 
 ![Pipeline](img/pipeline.png)
 
-Note that if you’re curious about the output of any components, you can always test out a smaller version of the chain such as `promptTemplate` or `promptTemplate.pipe(model)` to see the intermediate results.
+لاحظ أنه إذا كنت مهتمًا بمخرجات أي مكونات، يمكنك دائمًا اختبار نسخة أصغر من السلسلة مثل `promptTemplate` أو `promptTemplate.pipe(model)` لرؤية النتائج الوسيطة.
 
 ```dart
 final input = {'topic': 'ice cream'};
@@ -135,9 +135,9 @@ print(res2);
 // }
 ```
 
-## RAG Search Example
+## مثال بحث RAG (RAG Search Example)
 
-For our next example, we want to run a retrieval-augmented generation chain to add some context when responding to questions.
+بالنسبة لمثالنا التالي، نريد تشغيل سلسلة توليد معززة بالاسترجاع (retrieval-augmented generation chain) لإضافة بعض السياق عند الإجابة على الأسئلة.
 
 ```dart
 // 1. Create a vector store and add documents to it
@@ -180,7 +180,7 @@ print(res);
 // David created LangChain.dart
 ```
 
-In this case, the composed chain is:
+في هذه الحالة، السلسلة المركبة هي:
 
 ```dart
 final chain = setupAndRetrieval
@@ -189,9 +189,9 @@ final chain = setupAndRetrieval
     .pipe(outputParser);
 ```
 
-To explain this, we first can see that the prompt template above takes in `context` and `question` as values to be substituted in the prompt. Before building the prompt template, we want to retrieve relevant documents to the search and include them as part of the context.
+لتوضيح ذلك، يمكننا أولاً أن نرى أن قالب المطالبة (prompt template) أعلاه يأخذ `context` و `question` كقيم ليتم استبدالها في المطالبة. قبل بناء قالب المطالبة، نريد استرداد المستندات ذات الصلة بالبحث وتضمينها كجزء من السياق.
 
-As a preliminary step, we’ve set up the retriever using an in memory store, which can retrieve documents based on a query. This is a runnable component as well that can be chained together with other components, but you can also try to run it separately:
+كخطوة أولية، قمنا بإعداد المسترجع (retriever) باستخدام مخزن في الذاكرة (in memory store)، والذي يمكنه استرداد المستندات بناءً على استعلام. هذا مكون قابل للتشغيل (runnable component) أيضًا يمكن ربطه بمكونات أخرى، ولكن يمكنك أيضًا محاولة تشغيله بشكل منفصل:
 
 ```dart
 final res1 = await retriever.invoke('Who created LangChain.dart?');
@@ -200,7 +200,7 @@ print(res1);
 // Document{pageContent: LangChain was created by Harrison, metadata: {}}]
 ```
 
-We then use the `RunnableMap` to prepare the expected inputs into the prompt by using a string containing the combined retrieved documents as well as the original user question, using the `retriever` for document search, a `RunnableMapInput` to combine the documents and `RunnablePassthrough` to pass the user's question:
+ثم نستخدم `RunnableMap` لإعداد المدخلات المتوقعة في المطالبة باستخدام سلسلة تحتوي على المستندات المسترجعة المدمجة بالإضافة إلى سؤال المستخدم الأصلي، باستخدام `retriever` للبحث عن المستندات، و `RunnableMapInput` لدمج المستندات و `RunnablePassthrough` لتمرير سؤال المستخدم:
 
 ```dart
 final setupAndRetrieval = Runnable.fromMap<String>({
@@ -211,7 +211,7 @@ final setupAndRetrieval = Runnable.fromMap<String>({
 });
 ```
 
-To review, the complete chain is:
+للمراجعة، السلسلة الكاملة هي:
 
 ```dart
 final chain = setupAndRetrieval
@@ -220,10 +220,10 @@ final chain = setupAndRetrieval
     .pipe(outputParser);
 ```
 
-With the flow being:
-1. The first steps create a `RunnableMap` object with two entries. The first entry, `context` will include the combined document results fetched by the retriever. The second entry, `question` will contain the user’s original question. To pass on the `question`, we use `RunnablePassthrough` to copy this entry.
-2. Feed the map from the step above to the `promptTemplate` component. It then takes the user input which is `question` as well as the retrieved documents which is `context` to construct a prompt and output a `PromptValue`.
-3. The `model` component takes the generated prompt, and passes into the OpenAI LLM model for evaluation. The generated `output` from the model is a `ChatResult` object.
-4. Finally, the `outputParser` component takes in the `ChatResult`, and transforms this into a Dart String, which is returned from the invoke method.
+مع سير العمل كالتالي:
+1. الخطوات الأولى تنشئ كائن `RunnableMap` بإدخالين. الإدخال الأول، `context` سيتضمن نتائج المستندات المدمجة التي تم جلبها بواسطة المسترجع (retriever). الإدخال الثاني، `question` سيحتوي على سؤال المستخدم الأصلي. لتمرير `question`، نستخدم `RunnablePassthrough` لنسخ هذا الإدخال.
+2. يتم تغذية الخريطة من الخطوة أعلاه إلى مكون `promptTemplate`. ثم يأخذ إدخال المستخدم وهو `question` بالإضافة إلى المستندات المسترجعة وهي `context` لإنشاء مطالبة وإخراج `PromptValue`.
+3. يأخذ مكون `model` المطالبة التي تم إنشاؤها، ويمررها إلى نموذج OpenAI LLM للتقييم. المخرجات التي تم إنشاؤها من النموذج هي كائن `ChatResult`.
+4. أخيرًا، يأخذ مكون `outputParser` `ChatResult`، ويحولها إلى سلسلة Dart، والتي يتم إرجاعها من طريقة `invoke`.
 
 ![RAG Pipeline](img/rag_pipeline.png)
